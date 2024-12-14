@@ -30,7 +30,7 @@ build/
 build-ks/
 bin/
 out/
-db/
+swump.db
 
 # Logs #
 ########

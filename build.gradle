@@ -5,6 +5,7 @@ plugins {
     id 'java'
 }
 
+// dependencies
 repositories {
     mavenCentral()
 }
@@ -21,6 +22,20 @@ java {
     }
 }
 
+tasks.named("compileJava") {
+    options.encoding = 'UTF-8'
+}
+
+tasks.named("jar") {
+    manifest {
+        attributes(
+            "Implementation-Title": title,
+            "Implementation-Version": version,
+            "Main-Class": mainClass
+        )
+    }
+}
+
 // distribution plugin
 distributions {
     main {
@@ -28,28 +43,30 @@ distributions {
     }
 }
 
-// tasks
-tasks {
-    // java plugin
-    compileJava {
-        options.encoding = 'UTF-8'
+// shadow plugin
+tasks.named("shadowJar") {
+    minimize {
+        // runtimeOnly deps must be excluded from minimize
+        exclude(dependency("org.xerial:sqlite-jdbc:.*"))
+    }
+}
+
+// versions plugin
+tasks.named("dependencyUpdates") {
+    // disable file output
+    outputFormatter = ""
+
+    // ignore pre-release gradle
+    gradleReleaseChannel = "current"
+
+    // ignore pre-release libs
+    ext.isNonStable = { String version ->
+        def stableKeyword = ['RELEASE', 'FINAL', 'GA'].any { itm -> version.toUpperCase().contains(itm) }
+        def regex = /^[0-9,.v-]+(-r)?$/
+        return !stableKeyword && !(version ==~ regex)
     }
 
-    jar {
-        manifest {
-            attributes(
-                "Implementation-Title": title,
-                "Implementation-Version": version,
-                "Main-Class": mainClass
-            )
-        }
-    }
-
-    // shadow plugin
-    shadowJar {
-        minimize {
-            // runtimeOnly deps must be excluded from minimize
-            exclude(dependency("org.xerial:sqlite-jdbc:.*"))
-        }
-    }
+    rejectVersionIf {
+        isNonStable(it.candidate.version)
+    }    
 }

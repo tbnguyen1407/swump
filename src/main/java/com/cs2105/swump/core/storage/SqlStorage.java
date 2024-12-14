@@ -8,7 +8,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 public class SqlStorage implements Storage {
-    private static final String DATABASE = "jdbc:sqlite:db/sudoku.db";
+    private static final String DATABASE = "jdbc:sqlite:swump.db";
     private static final int MAX_SCORE_COUNT = 10;
     public static final int GENERATE_NEW_SEQ = 9999;
 
