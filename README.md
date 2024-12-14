@@ -1,11 +1,11 @@
 # Swump
 
-Sudoku with Unique Multi-player and Power-Ups
+Sudoku with Unique Multi Play
 
 ## Features
 
 - Single-player mode with multiple difficulty levels and accessibility features (pencil marks, hints)
-- Multi-player mode with unique Power-Ups
+- Multi-player mode with unique Power-ups
 - Solver mode with custom regions and cell constraints
 
 ## Build
