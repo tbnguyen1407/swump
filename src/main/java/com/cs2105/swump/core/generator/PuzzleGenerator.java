@@ -18,9 +18,7 @@ import org.jacop.core.IntVar;
  * uncovered cells(givens) are left.
  */
 
-public class PuzzleGenerator
-{
-
+public class PuzzleGenerator {
     private int[][] puzzleGrid = new int[9][9];
     private int[][] solutionGrid = new int[9][9];
     private final Solver solver = new Solver();
@@ -29,14 +27,11 @@ public class PuzzleGenerator
     private int givens = 0;
     private boolean isGenerated = false;
     private static PuzzleGenerator INSTANCE = null;
-    private boolean printInfo = false;
 
-    protected PuzzleGenerator()
-    {
+    protected PuzzleGenerator() {
     }
 
-    public static PuzzleGenerator getInstance()
-    {
+    public static PuzzleGenerator getInstance() {
         if (INSTANCE == null)
             INSTANCE = new PuzzleGenerator();
 
@@ -44,12 +39,10 @@ public class PuzzleGenerator
     }
 
     // Solver puzzle with region and marked constraint
-    public int[][] solvePuzzle(int[][] puzzleToSolve, int[][] regionGrid, String markerType, boolean[][] markerGrid)
-    {
+    public int[][] solvePuzzle(int[][] puzzleToSolve, int[][] regionGrid, String markerType, boolean[][] markerGrid) {
         solver.modelPuzzle(puzzleToSolve, regionGrid, markerType, markerGrid, true);
 
-        if (!solver.searchSmallestDomain())
-        {
+        if (!solver.searchSmallestDomain()) {
             solver.modelPuzzle(puzzleToSolve, regionGrid, markerType, markerGrid, false);
             solver.searchSmallestDomain();
         }
@@ -62,12 +55,10 @@ public class PuzzleGenerator
         return resultGrid;
     }
 
-    private void initialize()
-    {
+    private void initialize() {
         int inserted = 0;
         /** Insert values into three random unknown cells */
-        while (inserted < 3)
-        {
+        while (inserted < 3) {
             int value = RandomGenerator.getRandomValue();
             int numRow = RandomGenerator.getRandomRow();
             int numCol = RandomGenerator.getRandomCol();
@@ -95,10 +86,8 @@ public class PuzzleGenerator
     /**
      * A method that shuffles rows
      */
-    private void performRowSwap()
-    {
-        for (int row = 0; row < variables.length - 3; row += 3)
-        {
+    private void performRowSwap() {
+        for (int row = 0; row < variables.length - 3; row += 3) {
             IntVar[] temp = variables[row];
             variables[row] = variables[row + 2];
             variables[row + 2] = temp;
@@ -108,12 +97,9 @@ public class PuzzleGenerator
     /**
      * A method that shuffles columns
      */
-    private void performColumnSwap()
-    {
-        for (int row = 0; row < variables.length; row++)
-        {
-            for (int col = 0; col < variables[0].length - 3; col += 3)
-            {
+    private void performColumnSwap() {
+        for (int row = 0; row < variables.length; row++) {
+            for (int col = 0; col < variables[0].length - 3; col += 3) {
                 IntVar temp = variables[row][col];
                 variables[row][col] = variables[row][col + 2];
                 variables[row][col + 2] = temp;
@@ -123,35 +109,30 @@ public class PuzzleGenerator
 
     /**
      * A method that performs cell masking based on number of givens
+     * 
      * @return true/false
      */
-    private boolean mask()
-    {
+    private boolean mask() {
         long timeStarted;
         int currentNumOfGivens = 81;
-        try
-        {
+        try {
             timeStarted = System.currentTimeMillis();
-            while (currentNumOfGivens != givens)
-            {
+            while (currentNumOfGivens != givens) {
                 int row = RandomGenerator.getRandomRow();
                 int col = RandomGenerator.getRandomCol();
                 int removedA, removedB;
                 removedA = removedB = 0;
 
                 /** check if we're trying to mask already masked cells */
-                if (puzzleGrid[row][col] > 0 && puzzleGrid[col][row] > 0)
-                {
+                if (puzzleGrid[row][col] > 0 && puzzleGrid[col][row] > 0) {
                     /** Here, we mask mirrored pair cells */
-                    if (currentNumOfGivens - givens >= 2)
-                    {
+                    if (currentNumOfGivens - givens >= 2) {
                         removedA = puzzleGrid[row][col];
                         removedB = puzzleGrid[col][row];
                         puzzleGrid[row][col] = puzzleGrid[col][row] = 0;
                     }
 
-                    if (currentNumOfGivens - givens == 1)
-                    {
+                    if (currentNumOfGivens - givens == 1) {
                         removedA = puzzleGrid[row][col];
                         puzzleGrid[row][col] = 0;
                     }
@@ -165,25 +146,20 @@ public class PuzzleGenerator
                      * We are only interested in solvable and unique puzzles,
                      * only accept result if this is true
                      */
-                    if (!isSolvable || (numSolutions > 1))
-                    {
+                    if (!isSolvable || (numSolutions > 1)) {
                         puzzleGrid[row][col] = removedA;
                         puzzleGrid[col][row] = removedB;
                     }
                     currentNumOfGivens = countGivens(puzzleGrid);
 
-                    if ((System.currentTimeMillis() - timeStarted) > timeout)
-                    {
+                    if ((System.currentTimeMillis() - timeStarted) > timeout) {
                         isGenerated = false;
                         break;
-                    }
-                    else
+                    } else
                         isGenerated = true;
                 }
             }
-        }
-        catch (Exception e)
-        {
+        } catch (Exception e) {
             e.printStackTrace();
         }
 
@@ -191,8 +167,7 @@ public class PuzzleGenerator
 
     }
 
-    public int countGivens(int[][] a)
-    {
+    public int countGivens(int[][] a) {
         int givens = 0;
         for (int j = 0; j < a.length; j++)
             for (int[] anA : a)
@@ -204,8 +179,7 @@ public class PuzzleGenerator
     /**
      * Shuffles rows and columns while still making it valid
      */
-    private void performSwapOperation()
-    {
+    private void performSwapOperation() {
         performRowSwap();
         performColumnSwap();
     }
@@ -213,16 +187,12 @@ public class PuzzleGenerator
     /**
      * Creates a new puzzle with a specified number of givens
      */
-    public void generate(int givens) throws Exception
-    {
-        try
-        {
+    public void generate(int givens) throws Exception {
+        try {
             initialize();
             setNumberOfGivens(givens);
             mask();
-        }
-        catch (Exception e)
-        {
+        } catch (Exception e) {
             e.printStackTrace();
         }
     }
@@ -230,28 +200,23 @@ public class PuzzleGenerator
     /**
      * Sets how long should the generation take before exiting
      */
-    public void setTimeOut(long timeout)
-    {
+    public void setTimeOut(long timeout) {
         this.timeout = timeout;
     }
 
-    public void setNumberOfGivens(int givens)
-    {
+    public void setNumberOfGivens(int givens) {
         this.givens = givens;
     }
 
-    public int getNumberOfGivens()
-    {
+    public int getNumberOfGivens() {
         return givens;
     }
 
-    public int[][] getPuzzleSolution()
-    {
+    public int[][] getPuzzleSolution() {
         return solutionGrid;
     }
 
-    public int[][] getPuzzle()
-    {
+    public int[][] getPuzzle() {
         return puzzleGrid;
     }
 }

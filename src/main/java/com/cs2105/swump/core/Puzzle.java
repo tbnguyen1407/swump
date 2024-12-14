@@ -1,19 +1,11 @@
 package com.cs2105.swump.core;
 
-import com.cs2105.swump.core.solver.Solver;
-import com.cs2105.swump.gui.board.CellUI;
-
-import javax.swing.*;
-import java.util.ArrayList;
-
-public class Puzzle
-{
+public class Puzzle {
     public Cell[][] grid;
     private final long puzzleID;
     private int difficulty;
 
-    public Puzzle()
-    {
+    public Puzzle() {
         grid = new Cell[9][9];
         puzzleID = 1;
         difficulty = 3;
@@ -26,8 +18,7 @@ public class Puzzle
         int blockIndex = 1;
 
         for (int row = 0; row < 3; row++)
-            for (int col = 0; col < 3; col++)
-            {
+            for (int col = 0; col < 3; col++) {
                 for (int k = 0; k < 3; k++)
                     for (int m = 0; m < 3; m++)
                         grid[row * 3 + k][col * 3 + m].setRegionId(blockIndex);
@@ -35,16 +26,13 @@ public class Puzzle
             }
     }
 
-    public Puzzle(long id, int diff, String solution, String givens)
-    {
+    public Puzzle(long id, int diff, String solution, String givens) {
         grid = new Cell[9][9];
         puzzleID = id;
         difficulty = diff;
 
-        for (int i = 0; i < grid.length; i++)
-        {
-            for (int j = 0; j < grid[i].length; j++)
-            {
+        for (int i = 0; i < grid.length; i++) {
+            for (int j = 0; j < grid[i].length; j++) {
                 int value = Integer.parseInt(solution.charAt((9 * i) + j) + "");
                 boolean isFilled = Integer.parseInt(givens.charAt((9 * i) + j) + "") != 0;
 
@@ -53,28 +41,23 @@ public class Puzzle
         }
     }
 
-    public void setGrid(int[][] values)
-    {
-         for (int i = 0; i < grid.length; i++)
-            for (int j = 0; j < grid[i].length; j++)
-            {
+    public void setGrid(int[][] values) {
+        for (int i = 0; i < grid.length; i++)
+            for (int j = 0; j < grid[i].length; j++) {
                 grid[i][j].setValue(values[i][j]);
                 grid[i][j].setFilled();
             }
     }
 
-    public int getDifficulty()
-    {
+    public int getDifficulty() {
         return difficulty;
     }
 
-    public long getPuzzleID()
-    {
+    public long getPuzzleID() {
         return puzzleID;
     }
 
-    public int[][] getSystemAnswers()
-    {
+    public int[][] getSystemAnswers() {
         int[][] cellValue = new int[9][9];
         for (int i = 0; i < grid.length; i++)
             for (int j = 0; j < grid[i].length; j++)
@@ -82,13 +65,11 @@ public class Puzzle
         return cellValue;
     }
 
-    public int getSystemAnswers(int x, int y)
-    {
+    public int getSystemAnswers(int x, int y) {
         return grid[x][y].getValue();
     }
 
-    public int[][] getUserAnswers()
-    {
+    public int[][] getUserAnswers() {
         int[][] userAnswers = new int[9][9];
         for (int i = 0; i < grid.length; i++)
             for (int j = 0; j < grid[i].length; j++)
@@ -96,13 +77,11 @@ public class Puzzle
         return userAnswers;
     }
 
-    public int getUserAnswer(int x, int y)
-    {
+    public int getUserAnswer(int x, int y) {
         return grid[x][y].isFilled() ? grid[x][y].getValue() : 0;
     }
 
-    public int[][] getRegionGrid()
-    {
+    public int[][] getRegionGrid() {
         int[][] regionGrid = new int[9][9];
         for (int i = 0; i < grid.length; i++)
             for (int j = 0; j < grid.length; j++)
@@ -110,8 +89,7 @@ public class Puzzle
         return regionGrid;
     }
 
-    public boolean[][] getMarkedGrid()
-    {
+    public boolean[][] getMarkedGrid() {
         boolean[][] markedGrid = new boolean[9][9];
         for (int i = 0; i < grid.length; i++)
             for (int j = 0; j < grid.length; j++)
@@ -119,18 +97,15 @@ public class Puzzle
         return markedGrid;
     }
 
-    public Player getOwner(int x, int y)
-    {
+    public Player getOwner(int x, int y) {
         return grid[x][y].getOwner();
     }
 
-    public void setOwner(int x, int y, Player player)
-    {
+    public void setOwner(int x, int y, Player player) {
         grid[x][y].setOwner(player);
     }
 
-    public int[][][] getPencilMarks()
-    {
+    public int[][][] getPencilMarks() {
         int[][][] pencilMarks = new int[9][9][9];
         for (int i = 0; i < grid.length; i++)
             for (int j = 0; j < grid[i].length; j++)
@@ -138,28 +113,21 @@ public class Puzzle
         return pencilMarks;
     }
 
-
-    public int[] getPencilMarks(int x, int y)
-    {
+    public int[] getPencilMarks(int x, int y) {
         return grid[x][y].getPencilMarks();
     }
 
-    public boolean getMarked(int x, int y)
-    {
+    public boolean getMarked(int x, int y) {
         return grid[x][y].isMarked();
     }
 
-    public int getRegionId(int x, int y)
-    {
+    public int getRegionId(int x, int y) {
         return grid[x][y].getRegionId();
     }
 
-    public void setUserAnswers(int[][] userAnswers)
-    {
-        for (int i = 0; i < grid.length; i++)
-        {
-            for (int j = 0; j < grid[i].length; j++)
-            {
+    public void setUserAnswers(int[][] userAnswers) {
+        for (int i = 0; i < grid.length; i++) {
+            for (int j = 0; j < grid[i].length; j++) {
                 if (userAnswers[i][j] == 0)
                     grid[i][j].setUnfilled();
                 else
@@ -168,8 +136,7 @@ public class Puzzle
         }
     }
 
-    public void setUserAnswers(int x, int y, int userAnswer)
-    {
+    public void setUserAnswers(int x, int y, int userAnswer) {
         if (SudokuLogic.getInstance().getDifficulty() == 3)
             grid[x][y].setFilled();
         else if (grid[x][y].getValue() == userAnswer)
@@ -178,35 +145,29 @@ public class Puzzle
             grid[x][y].setUnfilled();
     }
 
-    public void setPencilMarks(int[][][] pencilMarks)
-    {
+    public void setPencilMarks(int[][][] pencilMarks) {
         for (int i = 0; i < grid.length; i++)
             for (int j = 0; j < grid[i].length; j++)
                 grid[i][j].setPencilMarks(pencilMarks[i][j]);
     }
 
-    public void setMarked(int x, int y)
-    {
+    public void setMarked(int x, int y) {
         grid[x][y].setMarked();
     }
 
-    public void addPencilMark(int x, int y, int value)
-    {
+    public void addPencilMark(int x, int y, int value) {
         grid[x][y].addPencilmark(value);
     }
 
-    public void addRegionId(int x, int y, int regionid)
-    {
+    public void addRegionId(int x, int y, int regionid) {
         grid[x][y].setRegionId(regionid);
     }
 
-    public Cell[][] getGrid()
-    {
+    public Cell[][] getGrid() {
         return grid;
     }
 
-    public void setGrid(Cell[][] grid)
-    {
+    public void setGrid(Cell[][] grid) {
         this.grid = grid;
     }
 }

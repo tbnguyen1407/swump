@@ -6,102 +6,19 @@ import org.jacop.core.Store;
 import org.jacop.search.*;
 
 import java.util.ArrayList;
+import java.util.List;
 
-public class Solver
-{
+public class Solver {
     public IntVar[][] elements;
     private ArrayList<IntVar> vars = new ArrayList<IntVar>();
     private Store store = new Store();
     public Search label;
 
     ///
-    /// Constraint generators
-    ///
-
-    private IntVar[][] generateMarkedConstraintMatrix(boolean[][] markedGrid, IntVar[][] modelPuzzle)
-    {
-        ArrayList<IntVar> markedVars = new ArrayList<IntVar>();
-
-        for (int i = 0; i < markedGrid.length; i++)
-            for (int j = 0; j < markedGrid[i].length; j++)
-                if (markedGrid[i][j])
-                    markedVars.add(modelPuzzle[i][j]);
-
-        IntVar[][] constraintMatrix = new IntVar[1][markedVars.size()];
-        for (int i = 0; i < markedVars.size(); i++)
-            constraintMatrix[0][i] = markedVars.get(i);
-
-        return constraintMatrix;
-    }
-
-    private IntVar[][] generateRegionConstraintMatrix(int[][] regionIndexMatrix, IntVar[][] modelPuzzle)
-    {
-        IntVar[][] constraintMatrix = new IntVar[modelPuzzle.length][modelPuzzle.length];
-        int[] indexMatrix = new int[modelPuzzle.length];
-        for (int i = 0; i < indexMatrix.length; i++)
-            indexMatrix[i] = 0;
-
-        for (int row = 0; row < modelPuzzle.length; row++)
-            for (int col = 0; col < modelPuzzle.length; col++)
-            {
-                int regionIndex = regionIndexMatrix[row][col] - 1;
-                constraintMatrix[regionIndex][indexMatrix[regionIndex]] = modelPuzzle[row][col];
-                indexMatrix[regionIndex]++;
-            }
-
-        return constraintMatrix;
-    }
-
-    private IntVar[][] generateDiagonalContraintMatrix(IntVar[][] modelPuzzle)
-    {
-        IntVar[][] constraintMatrix = new IntVar[2][modelPuzzle.length];
-
-        int numRow = modelPuzzle.length / 3;
-        int numCol = modelPuzzle.length / 3;
-
-        IntVar[] diagonalf = new IntVar[numRow * numCol];
-        IntVar[] diagonalb = new IntVar[numRow * numCol];
-
-        for (int row = 0; row < numRow * numCol; row++)
-        {
-            diagonalf[row] = elements[row][row];
-            diagonalb[row] = elements[row][numRow * numCol - row - 1];
-        }
-        constraintMatrix[0] = diagonalb;
-        constraintMatrix[1] = diagonalf;
-
-        return constraintMatrix;
-    }
-
-    private IntVar[][] generateHorizontalConstraintMatrix(IntVar[][] modelPuzzle)
-    {
-        IntVar[][] constraintMatrix = new IntVar[modelPuzzle.length][modelPuzzle.length];
-
-        for (int index = 0; index < modelPuzzle.length; index++)
-            constraintMatrix[index] = modelPuzzle[index];
-        return constraintMatrix;
-    }
-
-    private IntVar[][] generateVerticalConstraintMatrix(IntVar[][] modelPuzzle)
-    {
-        IntVar[][] constraintMatrix = new IntVar[modelPuzzle.length][modelPuzzle.length];
-
-        for (int index = 0; index < modelPuzzle.length; index++)
-        {
-            IntVar[] column = new IntVar[modelPuzzle.length];
-            for (int col = 0; col < modelPuzzle.length; col++)
-                column[col] = elements[col][index];
-
-            constraintMatrix[index] = column;
-        }
-        return constraintMatrix;
-    }
-
-    ///
     /// Puzzle modeling
     ///
-    public void modelPuzzle(int[][] puzzle, int[][] regionGrid, String markerType, boolean[][] markerGrid, boolean useDiagonalConstraint)
-    {
+    public void modelPuzzle(int[][] puzzle, int[][] customRegionGrid, String markerType, boolean[][] markerGrid,
+            boolean useDiagonalConstraint) {
         store = new Store();
         vars = new ArrayList<IntVar>();
 
@@ -110,78 +27,122 @@ public class Solver
         /** Creating variables and assigning constraints to them */
         for (int i = 0; i < puzzle.length; i++)
             for (int j = 0; j < puzzle.length; j++)
-                if (puzzle[i][j] == 0)
-                {
+                if (puzzle[i][j] == 0) {
                     elements[i][j] = new IntVar(store, "CELL(" + i + ", " + j + ")", 1, 9);
                     vars.add(elements[i][j]);
-                }
-                else
-                    elements[i][j] = new IntVar(store, "CELL(" + i + ", " + j + ")" + i + j, puzzle[i][j], puzzle[i][j]);
+                } else
+                    elements[i][j] = new IntVar(store, "CELL(" + i + ", " + j + ")" + i + j, puzzle[i][j],
+                            puzzle[i][j]);
 
         // Horizontal contraint
-        IntVar[][] horConstraint = generateHorizontalConstraintMatrix(elements);
-        for (IntVar[] aConstraint : horConstraint)
-            store.impose(new Alldistinct(aConstraint));
-
-        // Vertical constraint
-        IntVar[][] verConstraint = generateVerticalConstraintMatrix(elements);
-        for (IntVar[] aConstraint : verConstraint)
-            store.impose(new Alldistinct(aConstraint));
-
-        // Region constrant
-        IntVar[][] regConstraint = generateRegionConstraintMatrix(regionGrid, elements);
-        for (IntVar[] aConstraint : regConstraint)
-            store.impose(new Alldistinct(aConstraint));
-
-        // Marked constraint
-        IntVar[][] marConstraint = generateMarkedConstraintMatrix(markerGrid, elements);
-
-        for (IntVar[] aConstraint : marConstraint)
-            if (aConstraint != null && aConstraint.length > 0)
-            {
-                IntVar CONST0 = new IntVar(store, "const0", 0, 0);
-                IntVar CONST1 = new IntVar(store, "const1", 1, 1);
-                IntVar CONST2 = new IntVar(store, "const2", 2, 2);
-
-                switch (markerType.toLowerCase())
-                {
-                    case "same":
-                        for (int i = 0; i < aConstraint.length; i++)
-                           for (int j = 0; j < aConstraint.length; j++)
-                              if (i < j)
-                                  store.impose(new XeqY(aConstraint[i], aConstraint[j]));
-                        break;
-                    case "distinct":
-                        store.impose(new Alldistinct(aConstraint));
-                        break;
-                    case "even":
-                        for (int i = 0; i < aConstraint.length; i++)
-                            store.impose(new XmodYeqZ(aConstraint[i], CONST2, CONST0));
-                        break;
-                    case "odd":
-                        for (int i = 0; i < aConstraint.length; i++)
-                            store.impose(new XmodYeqZ(aConstraint[i], CONST2, CONST1));
-                        break;
-                }
-            }
-
-        if (useDiagonalConstraint)
-        {
-            // Diagonal constraint
-            IntVar[][] diaConstraint = generateDiagonalContraintMatrix(elements);
-            for (IntVar[] aConstraint : diaConstraint)
-            store.impose(new Alldistinct(aConstraint));
+        for (int r = 0; r < puzzle.length; r++) {
+            store.impose(new Alldistinct(elements[r]));
         }
 
+        // Vertical constraint
+        for (int col = 0; col < puzzle.length; col++) {
+            IntVar[] curCol = new IntVar[puzzle.length];
+            for (int row = 0; row < puzzle.length; row++) {
+                curCol[row] = elements[row][col];
+            }
+            store.impose(new Alldistinct(curCol));
+        }
+
+        // Region constraint
+        if (customRegionGrid != null) {
+            IntVar[][] customRegConstraints = new IntVar[puzzle.length][puzzle.length];
+            int[] regionIdxMatric = new int[puzzle.length];
+            // populate constraints
+            for (int row = 0; row < puzzle.length; row++) {
+                for (int col = 0; col < puzzle.length; col++) {
+                    int regionIndex = customRegionGrid[row][col] - 1;
+                    customRegConstraints[regionIndex][regionIdxMatric[regionIndex]] = elements[row][col];
+                    regionIdxMatric[regionIndex]++;
+                }
+            }
+            // impose constraints
+            for (IntVar[] aConstraint : customRegConstraints) {
+                store.impose(new Alldistinct(aConstraint));
+            }
+        } else { // default region constraint
+            int numRegions = puzzle.length / 3;
+            int regionSize = puzzle.length / 3;
+            for (int regRow = 0; regRow < numRegions; regRow++) {
+                for (int regCol = 0; regCol < numRegions; regCol++) {
+                    List<IntVar> reg = new ArrayList<>();
+                    for (int col = 0; col < regionSize; col++) {
+                        for (int row = 0; row < regionSize; row++) {
+                            reg.add(elements[regRow * regionSize + col][regCol * regionSize + row]);
+                        }
+                    }
+                    store.impose(new Alldistinct(reg));
+                }
+            }
+        }
+
+        // Marked constraint
+        if (markerGrid != null) {
+            List<IntVar> markedVars = new ArrayList<>();
+            for (int i = 0; i < markerGrid.length; i++)
+                for (int j = 0; j < markerGrid[i].length; j++)
+                    if (markerGrid[i][j])
+                        markedVars.add(elements[i][j]);
+
+            IntVar[][] marConstraint = new IntVar[1][markedVars.size()];
+            for (int i = 0; i < markedVars.size(); i++)
+                marConstraint[0][i] = markedVars.get(i);
+
+            for (IntVar[] aConstraint : marConstraint) {
+                if (aConstraint != null && aConstraint.length > 0) {
+                    IntVar CONST0 = new IntVar(store, "const0", 0, 0);
+                    IntVar CONST1 = new IntVar(store, "const1", 1, 1);
+                    IntVar CONST2 = new IntVar(store, "const2", 2, 2);
+
+                    switch (markerType.toLowerCase()) {
+                        case "same":
+                            for (int i = 0; i < aConstraint.length; i++)
+                                for (int j = 0; j < aConstraint.length; j++)
+                                    if (i < j)
+                                        store.impose(new XeqY(aConstraint[i], aConstraint[j]));
+                            break;
+                        case "distinct":
+                            store.impose(new Alldistinct(aConstraint));
+                            break;
+                        case "even":
+                            for (int i = 0; i < aConstraint.length; i++)
+                                store.impose(new XmodYeqZ(aConstraint[i], CONST2, CONST0));
+                            break;
+                        case "odd":
+                            for (int i = 0; i < aConstraint.length; i++)
+                                store.impose(new XmodYeqZ(aConstraint[i], CONST2, CONST1));
+                            break;
+                    }
+                }
+            }
+        }
+
+        // Diagonal constraint
+        if (useDiagonalConstraint) {
+            IntVar[] diagonalA = new IntVar[puzzle.length];
+            IntVar[] diagonalB = new IntVar[puzzle.length];
+
+            for (int row = 0; row < puzzle.length; row++) {
+                diagonalA[row] = elements[row][row];
+                diagonalB[row] = elements[row][puzzle.length - row - 1];
+            }
+
+            store.impose(new Alldistinct(diagonalA));
+            store.impose(new Alldistinct(diagonalB));
+        }
     }
 
     ///
     /// Search for solution
     ///
 
-    public boolean searchSmallestDomain()
-    {
-        SelectChoicePoint select = new SimpleSelect(vars.toArray(new IntVar[1]), new SmallestDomain(), new IndomainMin());
+    public boolean searchSmallestDomain() {
+        SelectChoicePoint select = new SimpleSelect(vars.toArray(new IntVar[1]), new SmallestDomain(),
+                new IndomainMin());
 
         label = new DepthFirstSearch();
         label.setPrintInfo(false);
@@ -189,9 +150,9 @@ public class Solver
         return label.labeling(store, select);
     }
 
-    public boolean searchAll()
-    {
-        SelectChoicePoint select = new SimpleSelect(vars.toArray(new IntVar[1]), new SmallestDomain(), new IndomainRandom());
+    public boolean searchAll() {
+        SelectChoicePoint select = new SimpleSelect(vars.toArray(new IntVar[1]), new SmallestDomain(),
+                new IndomainRandom());
 
         label = new DepthFirstSearch();
         label.setPrintInfo(false);

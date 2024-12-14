@@ -2,36 +2,31 @@ package com.cs2105.swump.core.generator;
 
 import com.cs2105.swump.core.storage.Storage;
 
-public class PuzzleStorageThread implements Runnable
-{
+public class PuzzleStorageThread implements Runnable {
+    private Storage storage;
     private int difficulty = 0;
     private final int BLANK = 0;
     private final int EASY = 38;
     private final int NORMAL = 33;
     private final int HARD = 28;
 
-    public PuzzleStorageThread(int difficulty)
-    {
+    public PuzzleStorageThread(Storage storage, int difficulty) {
+        this.storage = storage;
         this.difficulty = difficulty;
     }
 
-    public void setPuzzleDifficulty(int difficulty)
-    {
+    public void setPuzzleDifficulty(int difficulty) {
         this.difficulty = difficulty;
     }
 
-    public int getPuzzleDifficulty()
-    {
+    public int getPuzzleDifficulty() {
         return difficulty;
     }
 
-    public void run()
-    {
+    public void run() {
         int givens = 0;
-        Storage storage = Storage.getInstance();
         PuzzleGenerator generator = PuzzleGenerator.getInstance();
-        switch (difficulty)
-        {
+        switch (difficulty) {
             case 0:
                 givens = EASY;
                 break;
@@ -45,14 +40,11 @@ public class PuzzleStorageThread implements Runnable
                 givens = BLANK;
                 break;
         }
-        try
-        {
+        try {
             if (storage.getNumberOfPuzzles(difficulty) > 500)
                 Thread.sleep(1800000);
-            else
-            {
-                while (!Thread.interrupted())
-                {
+            else {
+                while (!Thread.interrupted()) {
                     Thread.sleep(1000);
                     generator.generate(givens);
                     if (generator.getPuzzleSolution() == null)
@@ -61,9 +53,7 @@ public class PuzzleStorageThread implements Runnable
                         storage.addPuzzle(generator.getPuzzleSolution(), generator.getPuzzle(), difficulty);
                 }
             }
-        }
-        catch (Exception e)
-        {
+        } catch (Exception e) {
             e.printStackTrace();
         }
     }

@@ -7,8 +7,7 @@ import com.cs2105.swump.core.multiplayer.powerups.TakeOverPowerUp;
 import java.awt.*;
 import java.util.ArrayList;
 
-public class Player
-{
+public class Player {
     private Score score;
     private long timeGiven;
     private Color color;
@@ -22,50 +21,41 @@ public class Player
 
     ArrayList<PowerUp> powerUpStore = new ArrayList<PowerUp>();
 
-    public Player()
-    {
+    public Player() {
         score = new Score();
     }
 
-    public Player(String name, Color color)
-    {
+    public Player(String name, Color color) {
         this.name = name;
         this.color = color;
         score = new Score();
     }
 
-    public void setTimeGiven(long time)
-    {
+    public void setTimeGiven(long time) {
         timeGiven = time;
     }
 
-    public long getTimeGiven()
-    {
+    public long getTimeGiven() {
         return timeGiven;
     }
 
-    public String getPlayerName()
-    {
+    public String getPlayerName() {
         return name;
     }
 
-    public void setScore(Score score)
-    {
+    public void setScore(Score score) {
         this.score = score;
     }
 
-    public Score getScore()
-    {
+    public Score getScore() {
         return score;
     }
 
-    public void setColor(Color playerColor)
-    {
+    public void setColor(Color playerColor) {
         this.color = playerColor;
     }
 
-    public Color getColor()
-    {
+    public Color getColor() {
         return color;
     }
 
@@ -73,12 +63,10 @@ public class Player
      * @param t Type of powerup, *refer to PowerUp interface*
      * @throws NullPointerException
      */
-    public boolean usePowerUp(PowerUp.Type t) throws NullPointerException
-    {
+    public boolean usePowerUp(PowerUp.Type t) throws NullPointerException {
         PowerUp p = null;
 
-        switch (t)
-        {
+        switch (t) {
             case HINT:
                 this.numHintPowerUp--;
                 p = retrievePowerUp(PowerUp.Type.HINT);
@@ -91,17 +79,17 @@ public class Player
                 this.numTimePowerUp--;
                 p = retrievePowerUp(PowerUp.Type.TIME);
                 break;
+            default:
+                break;
         }
-        if (p != null)
-        {
+        if (p != null) {
             p.setUser(this);
             return p.use();
         }
         return false;
     }
 
-    public void takeOver(int x, int y)
-    {
+    public void takeOver(int x, int y) {
         TakeOverPowerUp p = null;
         this.numTakeOverPowerUp--;
         p = (TakeOverPowerUp) retrievePowerUp(PowerUp.Type.TAKE_OVER);
@@ -110,12 +98,9 @@ public class Player
         p.use();
     }
 
-    public PowerUp retrievePowerUp(PowerUp.Type t)
-    {
-        for (PowerUp p : powerUpStore)
-        {
-            if (p.getType() == t)
-            {
+    public PowerUp retrievePowerUp(PowerUp.Type t) {
+        for (PowerUp p : powerUpStore) {
+            if (p.getType() == t) {
                 powerUpStore.remove(p);
                 return p;
             }
@@ -123,14 +108,11 @@ public class Player
         return null;
     }
 
-    public boolean addPowerup(PowerUp pu)
-    {
+    public boolean addPowerup(PowerUp pu) {
 
-        if (powerUpStore.size() < 3 && pu != null)
-        {
+        if (powerUpStore.size() < 3 && pu != null) {
             powerUpStore.add(pu);
-            switch (pu.getType())
-            {
+            switch (pu.getType()) {
                 case HINT:
                     this.numHintPowerUp++;
                     break;
@@ -145,28 +127,23 @@ public class Player
                     break;
             }
             return true;
-        }
-        else
+        } else
             return false;
     }
 
-    public void setNumHints(int hints)
-    {
+    public void setNumHints(int hints) {
         this.hints = hints;
     }
 
-    public int getNumHints()
-    {
+    public int getNumHints() {
         return this.hints;
     }
 
-    public void setTurnTries(int allowedTries)
-    {
+    public void setTurnTries(int allowedTries) {
         this.allowedTries = allowedTries;
     }
 
-    public int getTurnTries()
-    {
+    public int getTurnTries() {
         return allowedTries;
     }
 }

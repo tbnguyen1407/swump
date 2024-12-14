@@ -1,31 +1,41 @@
 plugins {
-    id 'com.github.ben-manes.versions' version '0.17.0'
-    id 'org.gradle.distribution'
-    id 'org.gradle.java'
+    alias(libs.plugins.shadow)
+    alias(libs.plugins.versions.plug)
+    id 'distribution'
+    id 'java'
 }
 
 repositories {
-    flatDir {
-        dirs "$rootProject.projectDir/lib"
-    }
-    jcenter()
-
+    mavenCentral()
 }
 
 dependencies {
-    implementation name: 'jacop-4.5.0'
-    runtimeOnly 'org.xerial:sqlite-jdbc:3.21.0'
-
+    implementation(libs.jacop)
+    runtimeOnly(libs.sqlite.jdbc)
 }
 
-plugins.withType(JavaPlugin) {
-    archivesBaseName = jarName
-    compileJava.options.encoding = 'UTF-8'
-    sourceCompatibility = '1.8'
-    targetCompatibility = '1.8'
-    
+// java plugin
+java {
+    toolchain {
+        languageVersion = JavaLanguageVersion.of(17)
+    }
+}
+
+// distribution plugin
+distributions {
+    main {
+        contents { from shadowJar }
+    }
+}
+
+// tasks
+tasks {
+    // java plugin
+    compileJava {
+        options.encoding = 'UTF-8'
+    }
+
     jar {
-        from { (configurations.default).collect { it.isDirectory() ? it : zipTree(it) } }
         manifest {
             attributes(
                 "Implementation-Title": title,
@@ -34,13 +44,12 @@ plugins.withType(JavaPlugin) {
             )
         }
     }
-}
 
-plugins.withType(DistributionPlugin) {
-    distributions {
-        main {
-            baseName = jarName
-            contents { from jar }
+    // shadow plugin
+    shadowJar {
+        minimize {
+            // runtimeOnly deps must be excluded from minimize
+            exclude(dependency("org.xerial:sqlite-jdbc:.*"))
         }
     }
 }

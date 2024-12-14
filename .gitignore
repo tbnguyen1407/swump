@@ -28,6 +28,7 @@ eclipse/
 .gradle/
 build/
 build-ks/
+bin/
 out/
 db/
 

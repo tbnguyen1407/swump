@@ -1,0 +1,7 @@
+[libraries]
+jacop       = { group = "org.jacop" , name = "jacop"      , version = "4.10.0"   }
+sqlite-jdbc = { group = "org.xerial", name = "sqlite-jdbc", version = "3.47.1.0" }
+
+[plugins]
+shadow        = { id = "com.gradleup.shadow",           version = "8.3.5"  }
+versions-plug = { id = "com.github.ben-manes.versions", version = "0.51.0" }
