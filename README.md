@@ -1,6 +1,14 @@
-# Swump
+<h1 align="center">
+  <img src="./src/main/dist/img/logo.png" alt="Logo">
 
-Sudoku with Unique Multi Play
+  <p align="center">Swump! - Sudoku with Unique Multi Play</p>
+</h1>
+
+## Table of Contents
+
+- [Features](#features)
+- [Development](#development)
+- [Authors](#authors)
 
 ## Features
 
@@ -8,7 +16,13 @@ Sudoku with Unique Multi Play
 - Multi-player mode with unique Power-ups
 - Solver mode with custom regions and cell constraints
 
-## Build
+## Development
+
+### Requirements
+
+- JDK 17+
+
+### Build
 
 ```shell
 ./gradlew clean build
