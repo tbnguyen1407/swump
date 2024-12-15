@@ -15,7 +15,7 @@
 ## Features
 
 - Single-player mode with multiple difficulty levels and accessibility features (pencil marks, hints)
-- Multi-player mode with unique Power-ups
+- Multi-player mode for up to 4 players with unique Power-ups
 - Solver mode with custom regions and cell constraints
 
 ## Development
