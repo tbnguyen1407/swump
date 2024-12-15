@@ -8,6 +8,8 @@
 
 - [Features](#features)
 - [Development](#development)
+    - [Requirements](#requirements)
+    - [Build](#build)
 - [Authors](#authors)
 
 ## Features
