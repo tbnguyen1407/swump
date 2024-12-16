@@ -45,6 +45,7 @@ distributions {
 
 // shadow plugin
 tasks.named("shadowJar") {
+    archiveClassifier = ''
     minimize {
         // runtimeOnly deps must be excluded from minimize
         exclude(dependency("org.xerial:sqlite-jdbc:.*"))

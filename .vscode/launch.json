@@ -5,7 +5,7 @@
             "type": "java",
             "name": "App",
             "request": "launch",
-            "mainClass": "com.cs2105.swump.App",
+            "mainClass": "swump.App",
             "projectName": "swump",
             "cwd": "${workspaceFolder}/src/main/dist"
         }
