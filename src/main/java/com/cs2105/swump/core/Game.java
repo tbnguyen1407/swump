@@ -1,16 +1,26 @@
 package com.cs2105.swump.core;
 
 public class Game {
+    // region fields
+
     private Puzzle puzzle;
     private int timeElapsed;
     private String gameName;
     private String timeStamped;
+
+    // endregion
+
+    // region constructors
 
     public Game(Puzzle puzzle, int timeElapsed, String gameName) {
         this.puzzle = puzzle;
         this.timeElapsed = timeElapsed;
         this.gameName = gameName;
     }
+
+    // endregion
+
+    // region accessors
 
     public Puzzle getPuzzle() {
         return puzzle;
@@ -43,4 +53,6 @@ public class Game {
     public void setTimeStamped(String timeStamped) {
         this.timeStamped = timeStamped;
     }
+
+    // endregion
 }

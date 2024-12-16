@@ -1,25 +1,31 @@
 package com.cs2105.swump.core;
 
+import java.awt.Color;
+import java.util.ArrayList;
+import java.util.List;
+
 import com.cs2105.swump.core.multiplayer.Score;
 import com.cs2105.swump.core.multiplayer.powerups.PowerUp;
 import com.cs2105.swump.core.multiplayer.powerups.TakeOverPowerUp;
 
-import java.awt.*;
-import java.util.ArrayList;
-
 public class Player {
+    // region fields
+
     private Score score;
     private long timeGiven;
     private Color color;
     private String name;
     private int hints = 0;
     private int allowedTries = 0;
-    public int numTakeOverPowerUp = 0;
-    public int numHintPowerUp = 0;
-    public int numTryPowerUp = 0;
-    public int numTimePowerUp = 0;
+    private int numTakeOverPowerUp = 0;
+    private int numHintPowerUp = 0;
+    private int numTryPowerUp = 0;
+    private int numTimePowerUp = 0;
+    private List<PowerUp> powerUpStore = new ArrayList<PowerUp>();
 
-    ArrayList<PowerUp> powerUpStore = new ArrayList<PowerUp>();
+    // endregion
+
+    // region constructors
 
     public Player() {
         score = new Score();
@@ -29,6 +35,26 @@ public class Player {
         this.name = name;
         this.color = color;
         score = new Score();
+    }
+
+    // endregion
+
+    // region accessors
+
+    public int getNumTakeOverPowerUp() {
+        return numTakeOverPowerUp;
+    }
+
+    public int getNumHintPowerUp() {
+        return numHintPowerUp;
+    }
+
+    public int getNumTimePowerUp() {
+        return numTimePowerUp;
+    }
+
+    public int getNumTryPowerUp() {
+        return numTryPowerUp;
     }
 
     public void setTimeGiven(long time) {
@@ -59,10 +85,26 @@ public class Player {
         return color;
     }
 
-    /**
-     * @param t Type of powerup, *refer to PowerUp interface*
-     * @throws NullPointerException
-     */
+    public void setNumHints(int hints) {
+        this.hints = hints;
+    }
+
+    public int getNumHints() {
+        return this.hints;
+    }
+
+    public void setTurnTries(int allowedTries) {
+        this.allowedTries = allowedTries;
+    }
+
+    public int getTurnTries() {
+        return allowedTries;
+    }
+
+    // endregion
+
+    // region public methods
+
     public boolean usePowerUp(PowerUp.Type t) throws NullPointerException {
         PowerUp p = null;
 
@@ -131,19 +173,5 @@ public class Player {
             return false;
     }
 
-    public void setNumHints(int hints) {
-        this.hints = hints;
-    }
-
-    public int getNumHints() {
-        return this.hints;
-    }
-
-    public void setTurnTries(int allowedTries) {
-        this.allowedTries = allowedTries;
-    }
-
-    public int getTurnTries() {
-        return allowedTries;
-    }
+    // endregion
 }

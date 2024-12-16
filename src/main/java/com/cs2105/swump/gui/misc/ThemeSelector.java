@@ -1,18 +1,29 @@
 package com.cs2105.swump.gui.misc;
 
-import com.cs2105.swump.gui.SudokuMainUI;
-
-import javax.swing.*;
-import java.awt.*;
+import java.awt.BorderLayout;
+import java.awt.Color;
+import java.awt.Dimension;
+import java.awt.Font;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
-public class ThemeSelector extends JDialog
-{
+import javax.swing.JComboBox;
+import javax.swing.JDialog;
+import javax.swing.JLabel;
+import javax.swing.JPanel;
+
+import com.cs2105.swump.gui.SudokuMainUI;
+
+public class ThemeSelector extends JDialog {
+    // region fields
+
     private static final long serialVersionUID = -7490402782065032152L;
 
-    public ThemeSelector()
-    {
+    // endregion
+
+    // region constructors
+
+    public ThemeSelector() {
         super(SudokuMainUI.main, "ThemeSelector", true);
         JPanel mainPanel = new JPanel();
         mainPanel.setPreferredSize(new Dimension(200, 50));
@@ -22,18 +33,15 @@ public class ThemeSelector extends JDialog
         this.setLocationRelativeTo(SudokuMainUI.main);
 
         this.setTitle("ThemeSelector selector");
-        String[] color = {"Greys", "Blue Green", "Blues", "Oranges", "Purples", "Red Purple", "Reds"};
+        String[] color = { "Greys", "Blue Green", "Blues", "Oranges", "Purples", "Red Purple", "Reds" };
 
         mainPanel.setLayout(new BorderLayout());
-        final JComboBox cboTheme = new JComboBox(color);
+        final JComboBox<String> cboTheme = new JComboBox<>(color);
         cboTheme.setSelectedItem(null);
-        cboTheme.addActionListener(new ActionListener()
-        {
-            public void actionPerformed(ActionEvent e)
-            {
+        cboTheme.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
                 int choice = cboTheme.getSelectedIndex();
-                switch (choice)
-                {
+                switch (choice) {
                     case 0:
                         changeTheme(new Color(240, 240, 240), new Color(189, 189, 189));
                         break;
@@ -65,8 +73,13 @@ public class ThemeSelector extends JDialog
         mainPanel.add(cboTheme, BorderLayout.SOUTH);
     }
 
-    private void changeTheme(Color x, Color y)
-    {
+    // endregion
+
+    // region private methods
+
+    private void changeTheme(Color x, Color y) {
         SudokuMainUI.main.sudokuBoard.changeTheme(x, y);
     }
+
+    // endregion
 }

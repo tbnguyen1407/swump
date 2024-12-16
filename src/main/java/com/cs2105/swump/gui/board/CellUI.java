@@ -1,14 +1,13 @@
 package com.cs2105.swump.gui.board;
 
-import com.cs2105.swump.core.Player;
-import com.cs2105.swump.core.SudokuLogic;
-import com.cs2105.swump.core.multiplayer.powerups.PowerUp;
-import com.cs2105.swump.gui.SudokuMainUI;
-import com.cs2105.swump.gui.misc.FontGenerator;
-
-import javax.imageio.ImageIO;
-import javax.swing.*;
-import java.awt.*;
+import java.awt.Color;
+import java.awt.Dimension;
+import java.awt.Font;
+import java.awt.Graphics;
+import java.awt.Graphics2D;
+import java.awt.Image;
+import java.awt.Point;
+import java.awt.RenderingHints;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
@@ -16,8 +15,20 @@ import java.awt.event.MouseEvent;
 import java.io.File;
 import java.io.IOException;
 
-public class CellUI extends JLabel
-{
+import javax.imageio.ImageIO;
+import javax.swing.JButton;
+import javax.swing.JLabel;
+import javax.swing.Timer;
+
+import com.cs2105.swump.core.Player;
+import com.cs2105.swump.core.SudokuLogic;
+import com.cs2105.swump.core.multiplayer.powerups.PowerUp;
+import com.cs2105.swump.gui.SudokuMainUI;
+import com.cs2105.swump.gui.misc.FontGenerator;
+
+public class CellUI extends JLabel {
+    // region fields
+
     private static final long serialVersionUID = 1L;
     private static final Dimension CELL_SIZE = new Dimension(50, 50);
 
@@ -27,17 +38,18 @@ public class CellUI extends JLabel
     private boolean cellError;
     private Image cellErrorImage;
 
-    public CellUI(int x, int y, int val, boolean filled)
-    {
+    // endregion
+
+    // region constructors
+
+    public CellUI(int x, int y, int val, boolean filled) {
         this.x = x;
         this.y = y;
         this.cellError = false;
-        try
-        {
-            this.cellErrorImage = (ImageIO.read(new File("img/iconWrong.png"))).getScaledInstance(60, 60, Image.SCALE_SMOOTH);
-        }
-        catch (IOException e)
-        {
+        try {
+            this.cellErrorImage = (ImageIO.read(new File("img/iconWrong.png"))).getScaledInstance(60, 60,
+                    Image.SCALE_SMOOTH);
+        } catch (IOException e) {
             this.cellErrorImage = null;
         }
 
@@ -47,35 +59,28 @@ public class CellUI extends JLabel
         this.setBackground(Color.WHITE);
         this.setOpaque(true);
 
-        this.addMouseListener(new MouseAdapter()
-        {
-            public void mousePressed(MouseEvent evt)
-            {
-                try
-                {
+        this.addMouseListener(new MouseAdapter() {
+            public void mousePressed(MouseEvent evt) {
+                try {
                     if (SudokuLogic.getInstance().getMode() == 0)
                         activateInputUI(evt);
-                    else
-                    {
+                    else {
                         JButton button = SudokuMainUI.main.getMultiPlayerPanel().getTakeOver();
-                        if (button.isEnabled() && button.isSelected())
-                        {
-                            Player tPlayer = SudokuLogic.getInstance().puzzle.getGrid()[getCoordX()][getCoordY()].getOwner();
+                        if (button.isEnabled() && button.isSelected()) {
+                            Player tPlayer = SudokuLogic.getInstance().getPuzzle().getGrid()[getCoordX()][getCoordY()]
+                                    .getOwner();
                             if (tPlayer == null)
                                 return;
-                            if (!tPlayer.getPlayerName().equals(SudokuLogic.getInstance().getCurrentPlayer().getPlayerName()))
-                            {
+                            if (!tPlayer.getPlayerName()
+                                    .equals(SudokuLogic.getInstance().getCurrentPlayer().getPlayerName())) {
                                 doTakeOver();
                                 button.setSelected(false);
                                 SudokuMainUI.main.repaint();
                             }
-                        }
-                        else
+                        } else
                             activateInputUI(evt);
                     }
-                }
-                catch (Exception obj)
-                {
+                } catch (Exception obj) {
                     obj.printStackTrace();
                 }
             }
@@ -83,24 +88,26 @@ public class CellUI extends JLabel
 
     }
 
-    private void doTakeOver()
-    {
+    // endregion
+
+    // region public methods
+
+    private void doTakeOver() {
         SudokuLogic.getInstance().setTargetPosX(getCoordX());
         SudokuLogic.getInstance().setTargetPosY(getCoordY());
         SudokuLogic.getInstance().usePowerUp(PowerUp.Type.TAKE_OVER);
     }
 
-    private void activateInputUI(MouseEvent evt)
-    {
+    private void activateInputUI(MouseEvent evt) {
         // Cannot modify in modes other than Solve
-        if (SudokuLogic.getInstance().getDifficulty() != 3 && SudokuLogic.getInstance().puzzle.getUserAnswer(x, y) != 0)
+        if (SudokuLogic.getInstance().getDifficulty() != 3
+                && SudokuLogic.getInstance().getPuzzle().getUserAnswer(x, y) != 0)
             return;
         // No need to show when in Marking mode
-        if (SudokuLogic.getInstance().getDifficulty() == 3 && SudokuMainUI.main.getIsMarkInput())
-        {
+        if (SudokuLogic.getInstance().getDifficulty() == 3 && SudokuMainUI.main.getIsMarkInput()) {
             SudokuMainUI.main.setActiveCell(this);
             CellUI curCell = SudokuMainUI.main.getActiveCell();
-            SudokuLogic.getInstance().puzzle.setMarked(curCell.getCoordX(), curCell.getCoordY());
+            SudokuLogic.getInstance().getPuzzle().setMarked(curCell.getCoordX(), curCell.getCoordY());
             this.repaint();
             return;
         }
@@ -129,42 +136,31 @@ public class CellUI extends JLabel
         main.repaint();
     }
 
-    public void inputValue(int val)
-    {
-        if (SudokuLogic.getInstance().validateCell(this.x, this.y, val))
-        {
+    public void inputValue(int val) {
+        if (SudokuLogic.getInstance().validateCell(this.x, this.y, val)) {
             SudokuMainUI.main.sudokuBoard.resetTheme();
             SudokuMainUI.main.updateProgressBar();
 
             if (SudokuLogic.getInstance().getState() == 1)
                 SudokuMainUI.main.showWin((int) (SudokuLogic.getInstance().getElapsedTime() / 1000));
-        }
-        else
-        {
+        } else {
             final CellUI cell = this;
             final Timer timer = new Timer(200, null);
-            timer.addActionListener(new ActionListener()
-            {
+            timer.addActionListener(new ActionListener() {
                 final int MAX = 5;
                 int count = 0;
 
-                public void actionPerformed(ActionEvent e)
-                {
-                    if (count <= MAX)
-                    {
-                        if (count % 2 == 0)
-                        {
+                public void actionPerformed(ActionEvent e) {
+                    if (count <= MAX) {
+                        if (count % 2 == 0) {
                             cell.setError(true);
                             SudokuMainUI.main.repaint();
-                        }
-                        else
-                        {
+                        } else {
                             cell.setError(false);
                             SudokuMainUI.main.repaint();
                         }
                         count++;
-                    }
-                    else
+                    } else
                         timer.stop();
                 }
             });
@@ -172,71 +168,56 @@ public class CellUI extends JLabel
         }
     }
 
-    public void inputPencilMark(int val)
-    {
+    public void inputPencilMark(int val) {
         SudokuLogic.getInstance().insertPencilMark(this.x, this.y, val);
         SudokuMainUI.main.sudokuBoard.resetTheme();
         this.repaint();
     }
 
-    public void inputRegionId(int regionid)
-    {
+    public void inputRegionId(int regionid) {
         SudokuLogic.getInstance().insertRegionId(this.x, this.y, regionid);
         SudokuMainUI.main.sudokuBoard.resetTheme();
         this.repaint();
     }
 
-    public void inputMark()
-    {
+    public void inputMark() {
         SudokuLogic.getInstance().insertMark(this.x, this.y);
         SudokuMainUI.main.sudokuBoard.resetTheme();
         this.repaint();
     }
 
-    public int getCoordX()
-    {
+    public int getCoordX() {
         return x;
     }
 
-    public int getCoordY()
-    {
+    public int getCoordY() {
         return y;
     }
 
     @Override
-    public void setBackground(Color bg)
-    {
+    public void setBackground(Color bg) {
         bgColor = bg;
     }
 
-    private void setError(boolean error)
-    {
+    private void setError(boolean error) {
         cellError = error;
     }
 
-    public void paintComponent(Graphics g)
-    {
+    public void paintComponent(Graphics g) {
         super.paintComponent(g);
         ((Graphics2D) g).setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
 
         // MultiPlayer
-        if (SudokuLogic.getInstance().getMode() == 1)
-        {
-            try
-            {
-                g.setColor(SudokuLogic.getInstance().puzzle.getOwner(x, y).getColor());
-            }
-            catch (NullPointerException n)
-            {
+        if (SudokuLogic.getInstance().getMode() == 1) {
+            try {
+                g.setColor(SudokuLogic.getInstance().getPuzzle().getOwner(x, y).getColor());
+            } catch (NullPointerException n) {
                 g.setColor(Color.WHITE);
             }
-        }
-        else if (SudokuLogic.getInstance().getDifficulty() == 3)
-        {
-             // draw regions
+        } else if (SudokuLogic.getInstance().getDifficulty() == 3) {
+            // draw regions
             Color regionColor;
-            switch (SudokuLogic.getInstance().puzzle.getRegionId(x, y))
-            {
+            switch (SudokuLogic.getInstance().getPuzzle().getRegionId(x, y)) {
                 case 1:
                     regionColor = new Color(150, 240, 200);
                     break;
@@ -269,8 +250,7 @@ public class CellUI extends JLabel
                     break;
             }
             g.setColor(regionColor);
-        }
-        else
+        } else
             g.setColor(bgColor);
 
         g.fillRoundRect(1, 1, this.getWidth() - 2, this.getHeight() - 2, 10, 10);
@@ -278,24 +258,22 @@ public class CellUI extends JLabel
         g.drawRoundRect(1, 1, this.getWidth() - 2, this.getHeight() - 2, 10, 10);
 
         // Draw border around actice cell
-        if (SudokuMainUI.main.getActiveCell() != null && SudokuMainUI.main.getActiveCell() == this)
-        {
+        if (SudokuMainUI.main.getActiveCell() != null && SudokuMainUI.main.getActiveCell() == this) {
             g.drawRoundRect(2, 2, this.getWidth() - 4, this.getHeight() - 4, 8, 8);
             g.drawRoundRect(3, 3, this.getWidth() - 6, this.getHeight() - 6, 6, 6);
         }
 
-        if (SudokuLogic.getInstance().puzzle == null)
+        if (SudokuLogic.getInstance().getPuzzle() == null)
             return;
 
         // draw marks
-        boolean isMarked = SudokuLogic.getInstance().puzzle.getMarked(x, y);
-        if (isMarked)
-        {
+        boolean isMarked = SudokuLogic.getInstance().getPuzzle().getMarked(x, y);
+        if (isMarked) {
             g.fillRoundRect(6, 6, 10, 10, 5, 5);
         }
 
-        int cellValue = SudokuLogic.getInstance().puzzle.getUserAnswer(x, y);
-        int[] pencilMarks = SudokuLogic.getInstance().puzzle.getPencilMarks(x, y);
+        int cellValue = SudokuLogic.getInstance().getPuzzle().getUserAnswer(x, y);
+        int[] pencilMarks = SudokuLogic.getInstance().getPuzzle().getPencilMarks(x, y);
         boolean isFilled = cellValue != 0;
 
         if (isFilled) // draw cellVal
@@ -308,7 +286,8 @@ public class CellUI extends JLabel
             int fontWidth = g.getFontMetrics().stringWidth(cellValStr);
             int fontHeight = g.getFontMetrics().getAscent() - g.getFontMetrics().getDescent();
 
-            g.drawString(cellValStr, (this.getWidth() - fontWidth) / 2, (this.getHeight() - fontHeight) / 2 + fontHeight);
+            g.drawString(cellValStr, (this.getWidth() - fontWidth) / 2,
+                    (this.getHeight() - fontHeight) / 2 + fontHeight);
         }
 
         else // draw pencilMarks
@@ -317,19 +296,16 @@ public class CellUI extends JLabel
             g.setColor(Color.BLACK);
 
             int loc = 0;
-            for (int i = 0; i < pencilMarks.length; i++)
-            {
+            for (int i = 0; i < pencilMarks.length; i++) {
                 String cellValStr = String.valueOf(i + 1);
                 int fontWidth = g.getFontMetrics().stringWidth(cellValStr);
                 int fontHeight = g.getFontMetrics().getAscent() - g.getFontMetrics().getDescent();
 
-                if (pencilMarks[i] == 1)
-                {
+                if (pencilMarks[i] == 1) {
                     loc++;
 
                     int horizPos = 1;
-                    switch (loc % 3)
-                    {
+                    switch (loc % 3) {
                         case 1:
                             horizPos = 1;
                             break;
@@ -349,19 +325,18 @@ public class CellUI extends JLabel
                     else
                         vertPos = 3;
 
-                    g.drawString(cellValStr, (((this.getWidth() - (fontWidth * 3)) / 4) * horizPos) + (horizPos - 1) * fontWidth, (((this.getHeight() - (fontHeight * 3)) / 4) * vertPos + fontHeight) + (vertPos - 1) * fontHeight);
+                    g.drawString(cellValStr,
+                            (((this.getWidth() - (fontWidth * 3)) / 4) * horizPos) + (horizPos - 1) * fontWidth,
+                            (((this.getHeight() - (fontHeight * 3)) / 4) * vertPos + fontHeight)
+                                    + (vertPos - 1) * fontHeight);
                 }
             }
         }
 
-        if (cellError)
-        {
-            if (cellErrorImage != null)
-            {
+        if (cellError) {
+            if (cellErrorImage != null) {
                 g.drawImage(cellErrorImage, 0, 0, getParent());
-            }
-            else
-            {
+            } else {
                 g.setColor(Color.RED);
                 g.fillRoundRect(1, 1, this.getWidth() - 2, this.getHeight() - 2, 10, 10);
                 g.setColor(Color.DARK_GRAY);
@@ -370,16 +345,13 @@ public class CellUI extends JLabel
             return;
         }
 
-        if (SudokuLogic.getInstance().getMode() == 1)
-        {
+        if (SudokuLogic.getInstance().getMode() == 1) {
             JButton button = SudokuMainUI.main.getMultiPlayerPanel().getTakeOver();
-            if (button.isEnabled() && button.isSelected())
-            {
-                Player tPlayer = SudokuLogic.getInstance().puzzle.getGrid()[getCoordX()][getCoordY()].getOwner();
+            if (button.isEnabled() && button.isSelected()) {
+                Player tPlayer = SudokuLogic.getInstance().getPuzzle().getGrid()[getCoordX()][getCoordY()].getOwner();
                 if (tPlayer == null)
                     return;
-                if (!tPlayer.getPlayerName().equals(SudokuLogic.getInstance().getCurrentPlayer().getPlayerName()))
-                {
+                if (!tPlayer.getPlayerName().equals(SudokuLogic.getInstance().getCurrentPlayer().getPlayerName())) {
                     g.setColor(Color.CYAN);
                     g.drawRoundRect(1, 1, this.getWidth() - 2, this.getHeight() - 2, 9, 9);
                     g.drawRoundRect(2, 2, this.getWidth() - 4, this.getHeight() - 4, 8, 8);
@@ -388,4 +360,6 @@ public class CellUI extends JLabel
             }
         }
     }
+
+    // endregion
 }

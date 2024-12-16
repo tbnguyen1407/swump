@@ -1,23 +1,40 @@
 package com.cs2105.swump.gui.single;
 
+import java.awt.BorderLayout;
+import java.awt.Dimension;
+import java.awt.Font;
+import java.awt.GridLayout;
+import java.awt.Image;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+
+import javax.swing.AbstractButton;
+import javax.swing.BorderFactory;
+import javax.swing.Box;
+import javax.swing.BoxLayout;
+import javax.swing.ImageIcon;
+import javax.swing.JButton;
+import javax.swing.JComboBox;
+import javax.swing.JLabel;
+import javax.swing.JPanel;
+
 import com.cs2105.swump.core.SudokuLogic;
 import com.cs2105.swump.core.generator.PuzzleGenerator;
 import com.cs2105.swump.gui.SudokuMainUI;
 import com.cs2105.swump.gui.misc.FontGenerator;
 
-import javax.swing.*;
-import java.awt.*;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
+public class SinglePlayerPanel extends JPanel {
+    // region fields
 
-public class SinglePlayerPanel extends JPanel
-{
     private static final long serialVersionUID = 1735162861773916659L;
     private JLabel difficulty;
     JLabel left;
 
-    public SinglePlayerPanel()
-    {
+    // endregion
+
+    // region constructors
+
+    public SinglePlayerPanel() {
         this.setLayout(new BorderLayout());
 
         // Stat panel
@@ -38,18 +55,9 @@ public class SinglePlayerPanel extends JPanel
 
         JLabel lbMarkerTypeHeader = new JLabel("Marker type:");
 
-        String[] markerTypes = {"Distinct", "Same", "Even", "Odd" };
-        final JComboBox cbxMarkerType = new JComboBox(markerTypes);
+        String[] markerTypes = { "Distinct", "Same", "Even", "Odd" };
+        final JComboBox<String> cbxMarkerType = new JComboBox<>(markerTypes);
         cbxMarkerType.setSelectedIndex(0);
-        cbxMarkerType.addActionListener(new ActionListener()
-        {
-            public void actionPerformed(ActionEvent actionEvent)
-            {
-                JComboBox cb = (JComboBox)actionEvent.getSource();
-                String selectedMarkerType = (String)cb.getSelectedItem();
-                System.out.println("cbx selected: " + selectedMarkerType);
-            }
-        });
 
         paneMarkerType.add(lbMarkerTypeHeader);
         paneMarkerType.add(Box.createHorizontalGlue());
@@ -67,16 +75,12 @@ public class SinglePlayerPanel extends JPanel
         btnHint.setVerticalTextPosition(AbstractButton.BOTTOM);
         btnHint.setHorizontalTextPosition(AbstractButton.CENTER);
         btnHint.setIconTextGap(-4);
-        btnHint.addActionListener(new ActionListener()
-        {
-            public void actionPerformed(ActionEvent e)
-            {
-                try
-                {
+        btnHint.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent ae) {
+                try {
                     int elapsedTime = (int) (SudokuLogic.getInstance().getElapsedTime() / 1000);
                     int hintLeft = SudokuLogic.getInstance().getCurrentPlayer().getNumHints();
-                    if (hintLeft > 0)
-                    {
+                    if (hintLeft > 0) {
                         btnHint.setEnabled(true);
                         SudokuLogic.getInstance().showHint();
                         SudokuMainUI.main.updateProgressBar();
@@ -85,13 +89,10 @@ public class SinglePlayerPanel extends JPanel
                             btnHint.setEnabled(false);
                         if (SudokuLogic.getInstance().getState() == 1)
                             SudokuMainUI.main.showWin(elapsedTime);
-                    }
-                    else
+                    } else
                         btnHint.setEnabled(false);
-                }
-                catch (Exception ex)
-                {
-                    ex.printStackTrace();
+                } catch (Exception e) {
+                    e.printStackTrace();
                 }
             }
         });
@@ -101,18 +102,17 @@ public class SinglePlayerPanel extends JPanel
         btnSolve.setVerticalTextPosition(AbstractButton.BOTTOM);
         btnSolve.setHorizontalTextPosition(AbstractButton.CENTER);
         btnSolve.setIconTextGap(-4);
-        btnSolve.addActionListener(new ActionListener()
-        {
-            public void actionPerformed(ActionEvent actionEvent)
-            {
-                int[][] puzzleToSolve = SudokuLogic.getInstance().puzzle.getUserAnswers();
+        btnSolve.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent actionEvent) {
+                int[][] puzzleToSolve = SudokuLogic.getInstance().getPuzzle().getUserAnswers();
 
                 // Collect constraints
-                int[][] puzzleCustomRegion = SudokuLogic.getInstance().puzzle.getRegionGrid();
-                boolean[][] puzzleMarkedGrid = SudokuLogic.getInstance().puzzle.getMarkedGrid();
+                int[][] puzzleCustomRegion = SudokuLogic.getInstance().getPuzzle().getRegionGrid();
+                boolean[][] puzzleMarkedGrid = SudokuLogic.getInstance().getPuzzle().getMarkedGrid();
 
-                int[][] resultPuzzle = PuzzleGenerator.getInstance().solvePuzzle(puzzleToSolve, puzzleCustomRegion, cbxMarkerType.getSelectedItem().toString(), puzzleMarkedGrid);
-                SudokuLogic.getInstance().puzzle.setGrid(resultPuzzle);
+                int[][] resultPuzzle = PuzzleGenerator.getInstance().solvePuzzle(puzzleToSolve, puzzleCustomRegion,
+                        cbxMarkerType.getSelectedItem().toString(), puzzleMarkedGrid);
+                SudokuLogic.getInstance().getPuzzle().setGrid(resultPuzzle);
                 SudokuMainUI.main.repaint();
             }
         });
@@ -122,16 +122,12 @@ public class SinglePlayerPanel extends JPanel
         btnToggle.setVerticalTextPosition(AbstractButton.BOTTOM);
         btnToggle.setHorizontalTextPosition(AbstractButton.CENTER);
         btnToggle.setIconTextGap(-4);
-        btnToggle.addActionListener(new ActionListener()
-        {
-            public void actionPerformed(ActionEvent e)
-            {
-                if (btnToggle.getText().equalsIgnoreCase("Pen"))
-                {
+        btnToggle.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                if (btnToggle.getText().equalsIgnoreCase("Pen")) {
                     paneMarkerType.setVisible(false);
 
-                    switch (SudokuLogic.getInstance().getDifficulty())
-                    {
+                    switch (SudokuLogic.getInstance().getDifficulty()) {
                         case 3: // Solver
                             btnToggle.setText("Region");
                             SudokuMainUI.main.setIsRegionInput();
@@ -147,17 +143,14 @@ public class SinglePlayerPanel extends JPanel
                             btnToggle.setIcon(getIcon("img/iconPencil.png"));
                             break;
                     }
-                }
-                else if (btnToggle.getText().equalsIgnoreCase("Region"))
-                {
+                } else if (btnToggle.getText().equalsIgnoreCase("Region")) {
                     btnToggle.setText("Marker");
                     SudokuMainUI.main.setIsMarkInput();
                     btnToggle.setIcon(getIcon("img/iconMark.png"));
 
                     paneMarkerType.setVisible(true);
-                }
-                else if (btnToggle.getText().equalsIgnoreCase("Pencil") || btnToggle.getText().equalsIgnoreCase("Marker"))
-                {
+                } else if (btnToggle.getText().equalsIgnoreCase("Pencil")
+                        || btnToggle.getText().equalsIgnoreCase("Marker")) {
                     btnToggle.setText("Pen");
                     SudokuMainUI.main.setIsValueInput();
                     btnToggle.setIcon(getIcon("img/iconPen.png"));
@@ -169,7 +162,7 @@ public class SinglePlayerPanel extends JPanel
 
         // Populate icon panels
         iconPanel.add(btnToggle);
-        iconPanel.add(Box.createRigidArea(new Dimension(5,0)));
+        iconPanel.add(Box.createRigidArea(new Dimension(5, 0)));
         if (SudokuLogic.getInstance().getDifficulty() == 3)
             iconPanel.add(btnSolve);
         else
@@ -184,16 +177,24 @@ public class SinglePlayerPanel extends JPanel
         this.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
     }
 
-    private ImageIcon getIcon(String imgPath)
-    {
+    // endregion
+
+    // region public methods
+
+    public void setDifficulty(String diff) {
+        difficulty.setText("Difficulty: " + diff);
+    }
+
+    // endregion
+
+    // region private methods
+
+    private ImageIcon getIcon(String imgPath) {
         ImageIcon icon = new ImageIcon(imgPath);
         Image img = icon.getImage();
         Image newimg = img.getScaledInstance(50, 50, Image.SCALE_SMOOTH);
         return new ImageIcon(newimg);
     }
 
-    public void setDifficulty(String diff)
-    {
-        difficulty.setText("Difficulty: " + diff);
-    }
+    // endregion
 }

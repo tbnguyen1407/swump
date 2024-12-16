@@ -1,102 +1,40 @@
 package com.cs2105.swump.core.storage;
 
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Statement;
+
 import com.cs2105.swump.core.Game;
 import com.cs2105.swump.core.Puzzle;
 
-import java.sql.*;
-import java.util.logging.Level;
-import java.util.logging.Logger;
-
 public class SqlStorage implements Storage {
-    private static final String DATABASE = "jdbc:sqlite:swump.db";
-    private static final int MAX_SCORE_COUNT = 10;
-    public static final int GENERATE_NEW_SEQ = 9999;
+    // region fields
 
-    private static class Util {
-        private static String toString(int[][] matrix) {
-            String str = "";
-            for (int i = 0; i < matrix.length; i++)
-                for (int j = 0; j < matrix[i].length; j++)
-                    str = str.concat(String.valueOf(matrix[i][j]));
+    private static SqlStorage instance;
+    private String database = "jdbc:sqlite:swump.db";
+    private int max_score_count = 10;
 
-            return str;
-        }
+    // endregion
 
-        private static String toString(int[][][] matrix) {
-            String str = "";
-            for (int i = 0; i < matrix.length; i++) {
-                for (int j = 0; j < matrix[i].length; j++) {
-                    for (int k = 0; k < matrix[i][j].length; k++)
-                        str = str.concat(String.valueOf(matrix[i][j][k]));
-                    str = str.concat(",");
-                }
-            }
-            return str;
-        }
-
-        private static int[][] to2DMatrix(String str) {
-            int[][] matrix = new int[9][9];
-
-            for (int i = 0; i < matrix.length; i++)
-                for (int j = 0; j < matrix[i].length; j++)
-                    matrix[i][j] = Integer.parseInt(str.charAt((9 * i) + j) + "");
-            return matrix;
-        }
-
-        private static int[][][] to3DMatrix(String str) {
-            int[][][] matrix = new int[9][9][9];
-
-            String[] thirdArrayStr = str.split(",");
-
-            for (int i = 0; i < matrix.length; i++) {
-                for (int j = 0; j < matrix[i].length; j++) {
-                    int[] thirdArrayInt = new int[9];
-                    for (int k = 0; k < thirdArrayInt.length; k++)
-                        thirdArrayInt[k] = Integer.parseInt(thirdArrayStr[(9 * i) + j].charAt(k) + "");
-                    matrix[i][j] = thirdArrayInt;
-                }
-            }
-            return matrix;
-        }
-    }
-
-    private static class StorageHolder {
-        private static final SqlStorage INSTANCE = new SqlStorage();
-    }
+    // region constructors
 
     private SqlStorage() {
         initializeDb();
     }
 
-    private boolean initializeDb() {
-        try {
-            // ensure driver is present
-            Class.forName("org.sqlite.JDBC");
-            Connection conn = DriverManager.getConnection(DATABASE);
-            Statement statement = conn.createStatement();
-
-            statement.executeUpdate(
-                    "CREATE TABLE IF NOT EXISTS puzzle (id INTEGER PRIMARY KEY AUTOINCREMENT, difficulty INTEGER, solution TEXT, givens TEXT);");
-            statement.executeUpdate("CREATE INDEX idx_puzzle_difficulty ON puzzle (difficulty);");
-
-            statement.executeUpdate(
-                    "CREATE TABLE IF NOT EXISTS score (id INTEGER PRIMARY KEY AUTOINCREMENT, difficulty INTEGER, player TEXT, score INTEGER);");
-            statement.executeUpdate("CREATE INDEX idx_score_difficulty ON score (difficulty);");
-
-            statement.executeUpdate(
-                    "CREATE TABLE IF NOT EXISTS game (id INTEGER PRIMARY KEY AUTOINCREMENT, name TEXT, answers TEXT, pencil_marks TEXT, time_elapsed TEXT, puzzle_id INTEGER);");
-            statement.executeUpdate("CREATE INDEX idx_game_name ON game (name);");
-        } catch (Exception ex) {
-            Logger.getLogger(SqlStorage.class.getName()).log(Level.SEVERE, null, ex);
-            return false;
-        }
-
-        return true;
-    }
-
     public static SqlStorage getInstance() {
-        return StorageHolder.INSTANCE;
+        if (instance == null) {
+            instance = new SqlStorage();
+        }
+        return instance;
     }
+
+    // endregion
+
+    // region public methods
 
     public int getNumberOfPuzzles(int difficulty) {
         if (difficulty < 0 || difficulty > 3)
@@ -105,7 +43,7 @@ public class SqlStorage implements Storage {
         int num = 0;
 
         try {
-            Connection conn = DriverManager.getConnection(DATABASE);
+            Connection conn = DriverManager.getConnection(database);
             conn.setAutoCommit(false);
 
             Statement stat = conn.createStatement();
@@ -120,8 +58,8 @@ public class SqlStorage implements Storage {
 
             conn.commit();
             conn.close();
-        } catch (Exception ex) {
-            Logger.getLogger(SqlStorage.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (Exception e) {
+            e.printStackTrace();
             return -1;
         }
 
@@ -135,7 +73,7 @@ public class SqlStorage implements Storage {
         Puzzle puzzle = null;
 
         try {
-            Connection conn = DriverManager.getConnection(DATABASE);
+            Connection conn = DriverManager.getConnection(database);
             conn.setAutoCommit(false);
 
             Statement stat = conn.createStatement();
@@ -154,8 +92,8 @@ public class SqlStorage implements Storage {
             rs.close();
             conn.commit();
             conn.close();
-        } catch (Exception ex) {
-            Logger.getLogger(SqlStorage.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (Exception e) {
+            e.printStackTrace();
             return null;
         }
 
@@ -166,7 +104,7 @@ public class SqlStorage implements Storage {
         Puzzle puzzle = null;
 
         try {
-            Connection conn = DriverManager.getConnection(DATABASE);
+            Connection conn = DriverManager.getConnection(database);
             conn.setAutoCommit(false);
 
             Statement stat = conn.createStatement();
@@ -184,8 +122,8 @@ public class SqlStorage implements Storage {
             rs.close();
             conn.commit();
             conn.close();
-        } catch (Exception ex) {
-            Logger.getLogger(SqlStorage.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (Exception e) {
+            e.printStackTrace();
             return null;
         }
 
@@ -195,15 +133,15 @@ public class SqlStorage implements Storage {
     public boolean addPuzzle(int[][] solution, int[][] givens, int difficulty) {
 
         try {
-            Connection conn = DriverManager.getConnection(DATABASE);
+            Connection conn = DriverManager.getConnection(database);
 
             PreparedStatement prep = conn
                     .prepareStatement("INSERT INTO Puzzle (solution, givens, difficulty) VALUES (?, ?, ?)");
 
             conn.setAutoCommit(false);
 
-            prep.setString(1, Util.toString(solution));
-            prep.setString(2, Util.toString(givens));
+            prep.setString(1, toString(solution));
+            prep.setString(2, toString(givens));
             prep.setInt(3, difficulty);
             prep.addBatch();
             prep.executeBatch();
@@ -213,8 +151,8 @@ public class SqlStorage implements Storage {
             conn.close();
 
             return true;
-        } catch (SQLException ex) {
-            Logger.getLogger(SqlStorage.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (SQLException e) {
+            e.printStackTrace();
         }
 
         return false;
@@ -223,7 +161,7 @@ public class SqlStorage implements Storage {
     public void deletePuzzle(long id) {
 
         try {
-            Connection conn = DriverManager.getConnection(DATABASE);
+            Connection conn = DriverManager.getConnection(database);
 
             PreparedStatement prep = conn.prepareStatement("DELETE FROM puzzle WHERE id = ?;");
 
@@ -236,14 +174,14 @@ public class SqlStorage implements Storage {
 
             conn.commit();
             conn.close();
-        } catch (SQLException ex) {
-            Logger.getLogger(SqlStorage.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (SQLException e) {
+            e.printStackTrace();
         }
     }
 
     public boolean updateScore(String player, int difficulty, long score) {
         try {
-            Connection conn = DriverManager.getConnection(DATABASE);
+            Connection conn = DriverManager.getConnection(database);
             conn.setAutoCommit(false);
 
             PreparedStatement prep = conn
@@ -260,49 +198,49 @@ public class SqlStorage implements Storage {
             conn.close();
 
             return true;
-        } catch (SQLException ex) {
-            Logger.getLogger(SqlStorage.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (SQLException e) {
+            e.printStackTrace();
         }
 
         return false;
     }
 
     public String[][][] retrieveScoreboard() {
-        String[][][] scoreboard = new String[3][MAX_SCORE_COUNT][3];
+        String[][][] scoreboard = new String[3][max_score_count][3];
         // String[EASY/ADV/HARD][TOP 10][PLAYERNAME/TIME/SCORE]
 
         try {
-            Connection conn = DriverManager.getConnection(DATABASE);
+            Connection conn = DriverManager.getConnection(database);
             conn.setAutoCommit(false);
 
-            scoreboard[0] = pullScoreboard(0, conn);
-            scoreboard[1] = pullScoreboard(1, conn);
-            scoreboard[2] = pullScoreboard(2, conn);
+            scoreboard[0] = retrieveScoreboardPerDifficulty(0, conn);
+            scoreboard[1] = retrieveScoreboardPerDifficulty(1, conn);
+            scoreboard[2] = retrieveScoreboardPerDifficulty(2, conn);
 
             conn.commit();
             conn.close();
-        } catch (Exception ex) {
-            Logger.getLogger(SqlStorage.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (Exception e) {
+            e.printStackTrace();
         }
 
         return scoreboard;
     }
 
-    private String[][] pullScoreboard(int diff, Connection conn) throws SQLException {
-        String[][] scoreboard = new String[MAX_SCORE_COUNT][3];
+    private String[][] retrieveScoreboardPerDifficulty(int diff, Connection conn) throws SQLException {
+        String[][] scoreboard = new String[max_score_count][3];
         Statement stat = conn.createStatement();
         ResultSet rs = stat.executeQuery("SELECT * FROM score WHERE difficulty = " + diff
-                + " ORDER BY score,timestamp LIMIT " + MAX_SCORE_COUNT + ";");
+                + " ORDER BY score,timestamp LIMIT " + max_score_count + ";");
 
         int i = 0;
         while (rs.next()) {
-            String playerName = rs.getString("player");
-            String timeStamp = rs.getString("timestamp");
+            String player = rs.getString("player");
+            String timestamp = rs.getString("timestamp");
             String score = rs.getString("score");
 
-            scoreboard[i % MAX_SCORE_COUNT][0] = playerName;
-            scoreboard[i % MAX_SCORE_COUNT][1] = timeStamp;
-            scoreboard[i % MAX_SCORE_COUNT][2] = score;
+            scoreboard[i % max_score_count][0] = player;
+            scoreboard[i % max_score_count][1] = timestamp;
+            scoreboard[i % max_score_count][2] = score;
             i++;
         }
 
@@ -315,7 +253,7 @@ public class SqlStorage implements Storage {
     public boolean saveGame(String name, Puzzle puzzle, long timeElapsed) {
 
         try {
-            Connection conn = DriverManager.getConnection(DATABASE);
+            Connection conn = DriverManager.getConnection(database);
 
             PreparedStatement prep = conn.prepareStatement(
                     "INSERT INTO game (name, pencil_marks, time_elapsed, puzzle_id) VALUES (?, ?, ?, ?, ?);");
@@ -323,8 +261,8 @@ public class SqlStorage implements Storage {
             conn.setAutoCommit(false);
 
             prep.setString(1, name);
-            prep.setString(2, Util.toString(puzzle.getPencilMarks()));
-            prep.setString(3, Util.toString(puzzle.getUserAnswers()));
+            prep.setString(2, toString(puzzle.getPencilMarks()));
+            prep.setString(3, toString(puzzle.getUserAnswers()));
             prep.setInt(4, (int) timeElapsed);
             prep.setInt(5, (int) puzzle.getPuzzleID());
             prep.addBatch();
@@ -335,8 +273,8 @@ public class SqlStorage implements Storage {
             conn.close();
 
             return true;
-        } catch (SQLException ex) {
-            Logger.getLogger(SqlStorage.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (SQLException e) {
+            e.printStackTrace();
         }
 
         return false;
@@ -347,7 +285,7 @@ public class SqlStorage implements Storage {
         Game game;
 
         try {
-            Connection conn = DriverManager.getConnection(DATABASE);
+            Connection conn = DriverManager.getConnection(database);
             conn.setAutoCommit(false);
 
             Statement stat = conn.createStatement();
@@ -368,12 +306,12 @@ public class SqlStorage implements Storage {
             conn.close();
 
             puzzle = retrievePuzzleByID(puzzleID);
-            puzzle.setUserAnswers(Util.to2DMatrix(userAnswers));
-            puzzle.setPencilMarks(Util.to3DMatrix(pencilMarks));
+            puzzle.setUserAnswers(to2DMatrix(userAnswers));
+            puzzle.setPencilMarks(to3DMatrix(pencilMarks));
 
             game = new Game(puzzle, timeElapsed, name);
-        } catch (Exception ex) {
-            Logger.getLogger(SqlStorage.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (Exception e) {
+            e.printStackTrace();
             return null;
         }
 
@@ -383,7 +321,7 @@ public class SqlStorage implements Storage {
     public void deleteGame(String name) {
 
         try {
-            Connection conn = DriverManager.getConnection(DATABASE);
+            Connection conn = DriverManager.getConnection(database);
 
             PreparedStatement prep = conn.prepareStatement("DELETE FROM game WHERE name = ?;");
 
@@ -396,8 +334,8 @@ public class SqlStorage implements Storage {
 
             conn.commit();
             conn.close();
-        } catch (SQLException ex) {
-            Logger.getLogger(SqlStorage.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (SQLException e) {
+            e.printStackTrace();
         }
     }
 
@@ -405,7 +343,7 @@ public class SqlStorage implements Storage {
         String[] savedGameList = null;
 
         try {
-            Connection conn = DriverManager.getConnection(DATABASE);
+            Connection conn = DriverManager.getConnection(database);
             conn.setAutoCommit(false);
 
             Statement stat = conn.createStatement();
@@ -427,11 +365,89 @@ public class SqlStorage implements Storage {
 
             conn.commit();
             conn.close();
-        } catch (Exception ex) {
-            Logger.getLogger(SqlStorage.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (Exception e) {
+            e.printStackTrace();
             return null;
         }
 
         return savedGameList;
     }
+
+    // endregion
+
+    // region private methods
+
+    private boolean initializeDb() {
+        try {
+            // ensure driver is present
+            Class.forName("org.sqlite.JDBC");
+            Connection conn = DriverManager.getConnection(database);
+            Statement statement = conn.createStatement();
+
+            statement.executeUpdate(
+                    "CREATE TABLE IF NOT EXISTS puzzle (id INTEGER PRIMARY KEY AUTOINCREMENT, difficulty INTEGER, solution TEXT, givens TEXT);");
+            statement.executeUpdate("CREATE INDEX IF NOT EXISTS idx_puzzle_difficulty ON puzzle (difficulty);");
+
+            statement.executeUpdate(
+                    "CREATE TABLE IF NOT EXISTS score (id INTEGER PRIMARY KEY AUTOINCREMENT, difficulty INTEGER, player TEXT, score INTEGER, timestamp TEXT);");
+            statement.executeUpdate("CREATE INDEX IF NOT EXISTS idx_score_difficulty ON score (difficulty);");
+
+            statement.executeUpdate(
+                    "CREATE TABLE IF NOT EXISTS game (id INTEGER PRIMARY KEY AUTOINCREMENT, name TEXT, answers TEXT, pencil_marks TEXT, time_elapsed TEXT, puzzle_id INTEGER);");
+            statement.executeUpdate("CREATE INDEX IF NOT EXISTS idx_game_name ON game (name);");
+
+            return true;
+        } catch (Exception e) {
+            e.printStackTrace();
+            return false;
+        }
+    }
+
+    private String toString(int[][] matrix) {
+        String str = "";
+        for (int i = 0; i < matrix.length; i++)
+            for (int j = 0; j < matrix[i].length; j++)
+                str = str.concat(String.valueOf(matrix[i][j]));
+
+        return str;
+    }
+
+    private String toString(int[][][] matrix) {
+        String str = "";
+        for (int i = 0; i < matrix.length; i++) {
+            for (int j = 0; j < matrix[i].length; j++) {
+                for (int k = 0; k < matrix[i][j].length; k++)
+                    str = str.concat(String.valueOf(matrix[i][j][k]));
+                str = str.concat(",");
+            }
+        }
+        return str;
+    }
+
+    private int[][] to2DMatrix(String str) {
+        int[][] matrix = new int[9][9];
+
+        for (int i = 0; i < matrix.length; i++)
+            for (int j = 0; j < matrix[i].length; j++)
+                matrix[i][j] = Integer.parseInt(str.charAt((9 * i) + j) + "");
+        return matrix;
+    }
+
+    private int[][][] to3DMatrix(String str) {
+        int[][][] matrix = new int[9][9][9];
+
+        String[] thirdArrayStr = str.split(",");
+
+        for (int i = 0; i < matrix.length; i++) {
+            for (int j = 0; j < matrix[i].length; j++) {
+                int[] thirdArrayInt = new int[9];
+                for (int k = 0; k < thirdArrayInt.length; k++)
+                    thirdArrayInt[k] = Integer.parseInt(thirdArrayStr[(9 * i) + j].charAt(k) + "");
+                matrix[i][j] = thirdArrayInt;
+            }
+        }
+        return matrix;
+    }
+
+    // endregion
 }

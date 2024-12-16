@@ -1,27 +1,42 @@
 package com.cs2105.swump.gui.multi;
 
-import com.cs2105.swump.core.SudokuLogic;
-import com.cs2105.swump.gui.SudokuMainUI;
-import com.cs2105.swump.gui.misc.FontGenerator;
-
-import javax.swing.*;
-import java.awt.*;
+import java.awt.BorderLayout;
+import java.awt.CardLayout;
+import java.awt.Font;
+import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
 import java.util.ArrayList;
+import java.util.List;
 
-public class MultiPlayerInit extends JDialog
-{
+import javax.swing.BorderFactory;
+import javax.swing.JButton;
+import javax.swing.JComboBox;
+import javax.swing.JDialog;
+import javax.swing.JLabel;
+import javax.swing.JOptionPane;
+import javax.swing.JPanel;
+
+import com.cs2105.swump.core.SudokuLogic;
+import com.cs2105.swump.gui.SudokuMainUI;
+import com.cs2105.swump.gui.misc.FontGenerator;
+
+public class MultiPlayerInit extends JDialog {
+    // region fields
+
     private int currentCard = 1;
     private JPanel cardPanel;
     private CardLayout cl;
     private JButton previousBtn;
     private JButton nextBtn;
 
-    public MultiPlayerInit()
-    {
+    // endregion
+
+    // region constructors
+
+    public MultiPlayerInit() {
         super(SudokuMainUI.main, "Multiplayer game", true);
 
         this.setSize(300, 300);
@@ -40,26 +55,26 @@ public class MultiPlayerInit extends JDialog
         gameSetting.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
 
         // Player
-        String choice[] = {"2", "3", "4"};
+        String choice[] = { "2", "3", "4" };
         JLabel lblNumPlayer = new JLabel("Number of players:");
-        final JComboBox cboChoice = new JComboBox(choice);
+        final JComboBox<String> cboChoice = new JComboBox<>(choice);
 
         // Select turn time
-        String turn[] = {"30", "45", "60", "90"};
+        String turn[] = { "30", "45", "60", "90" };
         JLabel lblNumTurn = new JLabel("Turn duration:");
-        final JComboBox cboTurn = new JComboBox(turn);
+        final JComboBox<String> cboTurn = new JComboBox<>(turn);
         cboTurn.setSelectedIndex(0);
 
         // Select try
-        String tries[] = {"5", "6", "7", "8", "9", "10"};
+        String tries[] = { "5", "6", "7", "8", "9", "10" };
         JLabel lblTry = new JLabel("Tries per turn:");
-        final JComboBox cboTry = new JComboBox(tries);
+        final JComboBox<String> cboTry = new JComboBox<>(tries);
         cboTry.setSelectedIndex(0);
 
         // Select difficulty
-        String difficulty[] = {"Blank", "Easy", "Normal", "Hard"};
+        String difficulty[] = { "Blank", "Easy", "Normal", "Hard" };
         JLabel lblDifficulty = new JLabel("Difficulty level:");
-        final JComboBox cboDiff = new JComboBox(difficulty);
+        final JComboBox<String> cboDiff = new JComboBox<>(difficulty);
         cboDiff.setSelectedIndex(0);
 
         // Adding control to game panel
@@ -79,29 +94,25 @@ public class MultiPlayerInit extends JDialog
         jp1.add(gameSetting, BorderLayout.CENTER);
 
         // Storage for player detail UI
-        final ArrayList<InputPlayer> players = new ArrayList<InputPlayer>();
+        final List<InputPlayer> players = new ArrayList<>();
 
         // jp2
         jp2.setLayout(new BorderLayout());
         final JPanel playerDetail = new JPanel();
         playerDetail.setLayout(new GridLayout(4, 1));
-        for (int i = 0; i < 2; i++)
-        {
+        for (int i = 0; i < 2; i++) {
             InputPlayer player = new InputPlayer(i + 1);
             playerDetail.add(player);
             players.add(player);
         }
 
         // Create player detail UI
-        cboChoice.addItemListener(new ItemListener()
-        {
-            public void itemStateChanged(ItemEvent event)
-            {
+        cboChoice.addItemListener(new ItemListener() {
+            public void itemStateChanged(ItemEvent event) {
                 players.clear();
                 int selection = Integer.parseInt((String) cboChoice.getSelectedItem());
                 playerDetail.removeAll();
-                for (int i = 0; i < selection; i++)
-                {
+                for (int i = 0; i < selection; i++) {
                     InputPlayer player = new InputPlayer(i + 1);
                     playerDetail.add(player);
                     players.add(player);
@@ -127,58 +138,43 @@ public class MultiPlayerInit extends JDialog
         buttonPanel.add(previousBtn);
         buttonPanel.add(nextBtn);
 
-        nextBtn.addActionListener(new ActionListener()
-        {
-            public void actionPerformed(ActionEvent arg0)
-            {
-                if (currentCard == 1)
-                {
+        nextBtn.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent arg0) {
+                if (currentCard == 1) {
                     nextBtn.setText("Start Game!");
                     previousBtn.setVisible(true);
                     currentCard += 1;
                     cl.show(cardPanel, "" + (currentCard));
-                }
-                else if (currentCard == 2)
-                {
+                } else if (currentCard == 2) {
                     boolean check = false;
                     currentCard += 1;
-                    for (int i = 0; i < players.size(); i++)
-                    {
-                        if (players.get(i).name != null)
+                    for (int i = 0; i < players.size(); i++) {
+                        if (players.get(i).getName() != null)
                             check = true;
-                        else
-                        {
+                        else {
                             check = false;
                             i = players.size();
                         }
 
                     }
-                    if (check)
-                    {
-                        if (checkSimilarColor())
-                        {
+                    if (check) {
+                        if (checkSimilarColor()) {
                             if (checkName())
                                 currentCard = 0;
-                            else
-                            {
+                            else {
                                 currentCard -= 1;
                                 JOptionPane.showMessageDialog(SudokuMainUI.main, "Ensure the names are unique.");
                             }
-                        }
-                        else
-                        {
+                        } else {
                             currentCard -= 1;
                             JOptionPane.showMessageDialog(SudokuMainUI.main, "Ensure the colours are unqiue.");
                         }
-                    }
-                    else
-                    {
+                    } else {
                         currentCard -= 1;
                         JOptionPane.showMessageDialog(SudokuMainUI.main, "Ensure that all names are entered.");
                     }
                 }
-                if (currentCard == 0)
-                {
+                if (currentCard == 0) {
                     setVisible(false);
                     int diff = 0;
                     String diffLevel = cboDiff.getSelectedItem().toString();
@@ -192,38 +188,34 @@ public class MultiPlayerInit extends JDialog
                         diff = 3;
 
                     for (int i = 0; i < players.size(); i++)
-                        SudokuLogic.getInstance().initializePlayer(players.get(i).name, players.get(i).color);
-                    SudokuLogic.getInstance().startNewGame(diff, Integer.parseInt(cboTurn.getSelectedItem().toString()), Integer.parseInt(cboTry.getSelectedItem().toString()));
+                        SudokuLogic.getInstance().initializePlayer(players.get(i).getName(), players.get(i).getColor());
+                    SudokuLogic.getInstance().startNewGameMP(diff,
+                            Integer.parseInt(cboTurn.getSelectedItem().toString()),
+                            Integer.parseInt(cboTry.getSelectedItem().toString()));
                     SudokuMainUI.main.activateMultiPlayerPanel();
                 }
             }
 
-            private boolean checkSimilarColor()
-            {
-                String temp, current;
-                for (int i = 0; i < players.size(); i++)
-                {
-                    temp = players.get(i).color.toString();
-                    for (int j = 0; j < players.size(); j++)
-                    {
-                        current = players.get(j).color.toString();
-                        if (i != j && temp.equalsIgnoreCase(current))
+            private boolean checkSimilarColor() {
+                String tmp, cur;
+                for (int i = 0; i < players.size(); i++) {
+                    tmp = players.get(i).getColor().toString();
+                    for (int j = 0; j < players.size(); j++) {
+                        cur = players.get(j).getColor().toString();
+                        if (i != j && tmp.equalsIgnoreCase(cur))
                             return false;
                     }
                 }
                 return true;
             }
 
-            private boolean checkName()
-            {
-                String temp, current;
-                for (int i = 0; i < players.size(); i++)
-                {
-                    temp = players.get(i).name.toString();
-                    for (int j = 0; j < players.size(); j++)
-                    {
-                        current = players.get(j).name.toString();
-                        if (i != j && temp.equals(current)) {
+            private boolean checkName() {
+                String tmp, cur;
+                for (int i = 0; i < players.size(); i++) {
+                    tmp = players.get(i).getName();
+                    for (int j = 0; j < players.size(); j++) {
+                        cur = players.get(j).getName();
+                        if (i != j && tmp.equals(cur)) {
                             return false;
                         }
                     }
@@ -232,12 +224,9 @@ public class MultiPlayerInit extends JDialog
             }
         });
 
-        previousBtn.addActionListener(new ActionListener()
-        {
-            public void actionPerformed(ActionEvent arg0)
-            {
-                if (currentCard > 1)
-                {
+        previousBtn.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent arg0) {
+                if (currentCard > 1) {
                     nextBtn.setText("Next");
                     previousBtn.setVisible(currentCard != 2);
                     currentCard -= 1;
@@ -253,4 +242,6 @@ public class MultiPlayerInit extends JDialog
         this.setResizable(false);
         this.setLocationRelativeTo(SudokuMainUI.main);
     }
+
+    // endregion
 }

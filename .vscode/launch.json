@@ -1,0 +1,13 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "type": "java",
+            "name": "App",
+            "request": "launch",
+            "mainClass": "com.cs2105.swump.App",
+            "projectName": "swump",
+            "cwd": "${workspaceFolder}/src/main/dist"
+        }
+    ]
+}

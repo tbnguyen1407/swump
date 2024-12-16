@@ -1,5 +1,21 @@
 package com.cs2105.swump.gui;
 
+import java.awt.BorderLayout;
+import java.awt.Font;
+import java.awt.GridLayout;
+import java.awt.Image;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+
+import javax.swing.AbstractButton;
+import javax.swing.BorderFactory;
+import javax.swing.ImageIcon;
+import javax.swing.JButton;
+import javax.swing.JFrame;
+import javax.swing.JOptionPane;
+import javax.swing.JPanel;
+import javax.swing.JProgressBar;
+
 import com.cs2105.swump.core.SudokuLogic;
 import com.cs2105.swump.gui.board.CellUI;
 import com.cs2105.swump.gui.board.InputUI;
@@ -13,12 +29,11 @@ import com.cs2105.swump.gui.multi.MultiPlayerStatPanel;
 import com.cs2105.swump.gui.single.SingleInit;
 import com.cs2105.swump.gui.single.SinglePlayerPanel;
 
-import javax.swing.*;
-import java.awt.*;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
-
 public class SudokuMainUI extends JFrame {
+    // region fields
+
+    private Thread gameUIUpdateThread;
+
     private JProgressBar progressBar;
     private static final long serialVersionUID = 6199126953768687537L;
 
@@ -27,8 +42,6 @@ public class SudokuMainUI extends JFrame {
     private SidePanel sidePanel;
     private SinglePlayerPanel singlePlayerPanel;
     private MultiPlayerStatPanel multiPlayerPanel;
-
-    public Thread gameUIUpdateThread;
 
     private AttentionSeeker attentionSeeker;
     private LogoPanel logoPanel;
@@ -44,6 +57,10 @@ public class SudokuMainUI extends JFrame {
     private String firstPlayerName;
     private String previousPlayerName;
     private boolean pauseTimer;
+
+    // endregion
+
+    // region constructors
 
     public SudokuMainUI() {
         createLogoPanel();
@@ -69,160 +86,9 @@ public class SudokuMainUI extends JFrame {
         main = this;
     }
 
-    private void createLogoPanel() {
-        logoPanel = new LogoPanel();
-        this.add(logoPanel);
-    }
+    // endregion
 
-    private void createAttentionSeeker() {
-        attentionSeeker = new AttentionSeeker("", 100, Font.PLAIN, 50);
-        this.add(attentionSeeker);
-    }
-
-    private void createInputUI() {
-        inputUI = new InputUI();
-        this.add(inputUI);
-    }
-
-    private void createControlPanel() {
-        // SinglePlayer button
-        JButton btnNewSingle = new JButton("Singleplayer", getIcon("img/iconSingleplayer.png"));
-        btnNewSingle.setVerticalTextPosition(AbstractButton.BOTTOM);
-        btnNewSingle.setHorizontalTextPosition(AbstractButton.CENTER);
-        btnNewSingle.setIconTextGap(-8);
-        btnNewSingle.addActionListener(new ActionListener() {
-            public void actionPerformed(ActionEvent e) {
-                new SingleInit().setVisible(true);
-                SudokuLogic.getInstance().setNumOfHints(3);
-                SudokuMainUI.main.repaint();
-            }
-        });
-
-        // MultiPlayer button
-        JButton btnNewMulti = new JButton("Multiplayer", getIcon("img/iconMultiplayer.png"));
-        btnNewMulti.setVerticalTextPosition(AbstractButton.BOTTOM);
-        btnNewMulti.setHorizontalTextPosition(AbstractButton.CENTER);
-        btnNewMulti.setIconTextGap(-8);
-        btnNewMulti.addActionListener(new ActionListener() {
-            public void actionPerformed(ActionEvent e) {
-                try {
-                    new MultiPlayerInit().setVisible(true);
-                    SudokuMainUI.main.repaint();
-                } catch (Exception ex) {
-                }
-            }
-        });
-
-        // LoadGame button
-        JButton btnLoadGame = new JButton("Load game", getIcon("img/iconLoad.png"));
-        btnLoadGame.setVerticalTextPosition(AbstractButton.BOTTOM);
-        btnLoadGame.setHorizontalTextPosition(AbstractButton.CENTER);
-        btnLoadGame.setIconTextGap(-8);
-        btnLoadGame.addActionListener(new ActionListener() {
-            public void actionPerformed(ActionEvent e) {
-                String gameList[] = SudokuLogic.getInstance().loadGameList();
-
-                try {
-                    String response = (String) JOptionPane.showInputDialog(null, "Select a saved game", "Load game",
-                            JOptionPane.PLAIN_MESSAGE, null, gameList, "");
-                    resumeSinglePlayerGame(response);
-                } catch (NullPointerException f) {
-                }
-            }
-        });
-
-        // SaveGame button
-        JButton btnSaveGame = new JButton("Save game", getIcon("img/iconSave.png"));
-        btnSaveGame.setVerticalTextPosition(AbstractButton.BOTTOM);
-        btnSaveGame.setHorizontalTextPosition(AbstractButton.CENTER);
-        btnSaveGame.setIconTextGap(-8);
-        btnSaveGame.addActionListener(new ActionListener() {
-            public void actionPerformed(ActionEvent e) {
-                if (SudokuLogic.getInstance().getState() != 0) {
-                    JOptionPane.showMessageDialog(null, "There is no game in progress.", "Error",
-                            JOptionPane.ERROR_MESSAGE);
-                    return;
-                }
-
-                if (SudokuLogic.getInstance().getMode() == 0) {
-                    Object result = JOptionPane.showInputDialog(SudokuMainUI.main, "Enter game name:");
-                    try {
-                        if (result != null && !result.toString().equals(""))
-                            SudokuLogic.getInstance().saveGame(result.toString());
-                        else if (result.toString().equals(""))
-                            JOptionPane.showMessageDialog(null, "Please enter a game name!");
-                    } catch (NullPointerException f) {
-                    }
-                } else {
-                    JOptionPane.showMessageDialog(null, "Saving is not available in multiplayer mode.", "Error",
-                            JOptionPane.ERROR_MESSAGE);
-                }
-            }
-        });
-
-        // ScoreBoard button
-        JButton btnScoreBoard = new JButton("Scoreboard", getIcon("img/iconScore.png"));
-        btnScoreBoard.setVerticalTextPosition(AbstractButton.BOTTOM);
-        btnScoreBoard.setHorizontalTextPosition(AbstractButton.CENTER);
-        btnScoreBoard.setIconTextGap(-8);
-        btnScoreBoard.addActionListener(new ActionListener() {
-            public void actionPerformed(ActionEvent e) {
-                new Scoreboard().setVisible(true);
-            }
-        });
-
-        // ChangeTheme button
-        JButton btnChangeTheme = new JButton("Themes", getIcon("img/iconTheme.png"));
-        btnChangeTheme.setVerticalTextPosition(AbstractButton.BOTTOM);
-        btnChangeTheme.setHorizontalTextPosition(AbstractButton.CENTER);
-        btnChangeTheme.setIconTextGap(-8);
-        btnChangeTheme.addActionListener(new ActionListener() {
-            public void actionPerformed(ActionEvent e) {
-                new ThemeSelector().setVisible(true);
-            }
-        });
-
-        // About button
-        JButton btnAbout = new JButton("About", getIcon("img/iconAbout.png"));
-        btnAbout.setVerticalTextPosition(AbstractButton.BOTTOM);
-        btnAbout.setHorizontalTextPosition(AbstractButton.CENTER);
-        btnAbout.setIconTextGap(-8);
-        btnAbout.addActionListener(new ActionListener() {
-            public void actionPerformed(ActionEvent e) {
-                new About();
-            }
-        });
-
-        // ControlPanel
-        JPanel controlPanel = new JPanel();
-        controlPanel.setLayout(new GridLayout(1, 7));
-        controlPanel.add(btnNewSingle);
-        controlPanel.add(btnNewMulti);
-        // controlPanel.add(btnSaveGame);
-        // controlPanel.add(btnLoadGame);
-        controlPanel.add(btnScoreBoard);
-        controlPanel.add(btnChangeTheme);
-        controlPanel.add(btnAbout);
-        controlPanel.setBorder(BorderFactory.createEmptyBorder(5, 5, 5, 5));
-
-        // ProgressBar
-        progressBar = new JProgressBar();
-        progressBar.setStringPainted(true);
-        progressBar.setValue(0);
-        progressBar.setMaximum(81);
-
-        // Populate main ui components
-        this.add(controlPanel, BorderLayout.NORTH);
-        this.add(progressBar, BorderLayout.SOUTH);
-    }
-
-    private ImageIcon getIcon(String imgPath) {
-        ImageIcon icon = new ImageIcon(imgPath);
-        Image img = icon.getImage();
-        Image newimg = img.getScaledInstance(60, 60, Image.SCALE_SMOOTH);
-        return new ImageIcon(newimg);
-
-    }
+    // region public methods
 
     public void updateProgressBar() {
         progressBar.setValue(81 - SudokuLogic.getInstance().getRemainingCells());
@@ -416,8 +282,10 @@ public class SudokuMainUI extends JFrame {
                         try {
                             Thread.sleep(500);
                         } catch (InterruptedException e) {
+                            e.printStackTrace();
                         }
                     } catch (Exception e) {
+                        e.printStackTrace();
                     }
                 }
             }
@@ -433,7 +301,7 @@ public class SudokuMainUI extends JFrame {
     }
 
     public void startNewSinglePlayerGame(int difficulty) {
-        SudokuLogic.getInstance().startNewGame(difficulty);
+        SudokuLogic.getInstance().startNewGameSP(difficulty);
         attentionSeeker.setVisible(false);
         activateSinglePlayerPanel(difficulty);
         SudokuLogic.getInstance().setNumOfHints(3);
@@ -442,8 +310,170 @@ public class SudokuMainUI extends JFrame {
 
     public void resumeSinglePlayerGame(String name) {
         SudokuLogic.getInstance().loadGame(name);
-        activateSinglePlayerPanel(SudokuLogic.getInstance().puzzle.getDifficulty());
+        activateSinglePlayerPanel(SudokuLogic.getInstance().getPuzzle().getDifficulty());
         SudokuLogic.getInstance().setNumOfHints(3);
         updateProgressBar();
     }
+
+    // endregion
+
+    // region private methods
+
+    private void createAttentionSeeker() {
+        attentionSeeker = new AttentionSeeker("", 100, Font.PLAIN, 50);
+        this.add(attentionSeeker);
+    }
+
+    private void createInputUI() {
+        inputUI = new InputUI();
+        this.add(inputUI);
+    }
+
+    private void createLogoPanel() {
+        logoPanel = new LogoPanel();
+        this.add(logoPanel);
+    }
+
+    private void createControlPanel() {
+        // SinglePlayer button
+        JButton btnNewSingle = new JButton("Singleplayer", getIcon("img/iconSingleplayer.png"));
+        btnNewSingle.setVerticalTextPosition(AbstractButton.BOTTOM);
+        btnNewSingle.setHorizontalTextPosition(AbstractButton.CENTER);
+        btnNewSingle.setIconTextGap(-8);
+        btnNewSingle.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                new SingleInit().setVisible(true);
+                SudokuLogic.getInstance().setNumOfHints(3);
+                SudokuMainUI.main.repaint();
+            }
+        });
+
+        // MultiPlayer button
+        JButton btnNewMulti = new JButton("Multiplayer", getIcon("img/iconMultiplayer.png"));
+        btnNewMulti.setVerticalTextPosition(AbstractButton.BOTTOM);
+        btnNewMulti.setHorizontalTextPosition(AbstractButton.CENTER);
+        btnNewMulti.setIconTextGap(-8);
+        btnNewMulti.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent ae) {
+                try {
+                    new MultiPlayerInit().setVisible(true);
+                    SudokuMainUI.main.repaint();
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            }
+        });
+
+        // LoadGame button
+        JButton btnLoadGame = new JButton("Load game", getIcon("img/iconLoad.png"));
+        btnLoadGame.setVerticalTextPosition(AbstractButton.BOTTOM);
+        btnLoadGame.setHorizontalTextPosition(AbstractButton.CENTER);
+        btnLoadGame.setIconTextGap(-8);
+        btnLoadGame.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                String gameList[] = SudokuLogic.getInstance().loadGameList();
+
+                try {
+                    String response = (String) JOptionPane.showInputDialog(null, "Select a saved game", "Load game",
+                            JOptionPane.PLAIN_MESSAGE, null, gameList, "");
+                    resumeSinglePlayerGame(response);
+                } catch (NullPointerException f) {
+                }
+            }
+        });
+
+        // SaveGame button
+        JButton btnSaveGame = new JButton("Save game", getIcon("img/iconSave.png"));
+        btnSaveGame.setVerticalTextPosition(AbstractButton.BOTTOM);
+        btnSaveGame.setHorizontalTextPosition(AbstractButton.CENTER);
+        btnSaveGame.setIconTextGap(-8);
+        btnSaveGame.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                if (SudokuLogic.getInstance().getState() != 0) {
+                    JOptionPane.showMessageDialog(null, "There is no game in progress.", "Error",
+                            JOptionPane.ERROR_MESSAGE);
+                    return;
+                }
+
+                if (SudokuLogic.getInstance().getMode() == 0) {
+                    Object result = JOptionPane.showInputDialog(SudokuMainUI.main, "Enter game name:");
+                    try {
+                        if (result != null && !result.toString().equals(""))
+                            SudokuLogic.getInstance().saveGame(result.toString());
+                        else if (result.toString().equals(""))
+                            JOptionPane.showMessageDialog(null, "Please enter a game name!");
+                    } catch (NullPointerException f) {
+                    }
+                } else {
+                    JOptionPane.showMessageDialog(null, "Saving is not available in multiplayer mode.", "Error",
+                            JOptionPane.ERROR_MESSAGE);
+                }
+            }
+        });
+
+        // ScoreBoard button
+        JButton btnScoreBoard = new JButton("Scoreboard", getIcon("img/iconScore.png"));
+        btnScoreBoard.setVerticalTextPosition(AbstractButton.BOTTOM);
+        btnScoreBoard.setHorizontalTextPosition(AbstractButton.CENTER);
+        btnScoreBoard.setIconTextGap(-8);
+        btnScoreBoard.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                new Scoreboard().setVisible(true);
+            }
+        });
+
+        // ChangeTheme button
+        JButton btnChangeTheme = new JButton("Themes", getIcon("img/iconTheme.png"));
+        btnChangeTheme.setVerticalTextPosition(AbstractButton.BOTTOM);
+        btnChangeTheme.setHorizontalTextPosition(AbstractButton.CENTER);
+        btnChangeTheme.setIconTextGap(-8);
+        btnChangeTheme.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                new ThemeSelector().setVisible(true);
+            }
+        });
+
+        // About button
+        JButton btnAbout = new JButton("About", getIcon("img/iconAbout.png"));
+        btnAbout.setVerticalTextPosition(AbstractButton.BOTTOM);
+        btnAbout.setHorizontalTextPosition(AbstractButton.CENTER);
+        btnAbout.setIconTextGap(-8);
+        btnAbout.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                new About();
+            }
+        });
+
+        // ControlPanel
+        JPanel controlPanel = new JPanel();
+        controlPanel.setLayout(new GridLayout(1, 7));
+        controlPanel.add(btnNewSingle);
+        controlPanel.add(btnNewMulti);
+        // controlPanel.add(btnSaveGame);
+        // controlPanel.add(btnLoadGame);
+        controlPanel.add(btnScoreBoard);
+        controlPanel.add(btnChangeTheme);
+        controlPanel.add(btnAbout);
+        controlPanel.setBorder(BorderFactory.createEmptyBorder(5, 5, 5, 5));
+
+        // ProgressBar
+        progressBar = new JProgressBar();
+        progressBar.setStringPainted(true);
+        progressBar.setValue(0);
+        progressBar.setMaximum(81);
+
+        // Populate main ui components
+        this.add(controlPanel, BorderLayout.NORTH);
+        this.add(progressBar, BorderLayout.SOUTH);
+    }
+
+    private ImageIcon getIcon(String imgPath) {
+        ImageIcon icon = new ImageIcon(imgPath);
+        Image img = icon.getImage();
+        Image newimg = img.getScaledInstance(60, 60, Image.SCALE_SMOOTH);
+        return new ImageIcon(newimg);
+
+    }
+
+    // endregion
 }

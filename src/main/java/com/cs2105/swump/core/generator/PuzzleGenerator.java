@@ -19,26 +19,71 @@ import org.jacop.core.IntVar;
  */
 
 public class PuzzleGenerator {
+    // region fields
+
     private int[][] puzzleGrid = new int[9][9];
     private int[][] solutionGrid = new int[9][9];
     private final Solver solver = new Solver();
-    public IntVar[][] variables = new IntVar[9][9];
+    private IntVar[][] variables = new IntVar[9][9];
     private long timeout = 2000;
     private int givens = 0;
     private boolean isGenerated = false;
-    private static PuzzleGenerator INSTANCE = null;
+    private static PuzzleGenerator instance = null;
+
+    // endregion
+
+    // region constructors
 
     protected PuzzleGenerator() {
     }
 
     public static PuzzleGenerator getInstance() {
-        if (INSTANCE == null)
-            INSTANCE = new PuzzleGenerator();
+        if (instance == null)
+            instance = new PuzzleGenerator();
 
-        return INSTANCE;
+        return instance;
     }
 
-    // Solver puzzle with region and marked constraint
+    // endregion
+
+    // region accessors
+
+    public void setTimeOut(long timeout) {
+        this.timeout = timeout;
+    }
+
+    public void setNumberOfGivens(int givens) {
+        this.givens = givens;
+    }
+
+    public int getNumberOfGivens() {
+        return givens;
+    }
+
+    public int[][] getPuzzleSolution() {
+        return solutionGrid;
+    }
+
+    public int[][] getPuzzle() {
+        return puzzleGrid;
+    }
+
+    // endregion
+
+    // region public methods
+
+    // Creates a new puzzle with a specified number of givens
+    public void generate(int givens) throws Exception {
+        try {
+            initialize();
+            setNumberOfGivens(givens);
+            mask();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    // Solve puzzle with region and marked constraint
     public int[][] solvePuzzle(int[][] puzzleToSolve, int[][] regionGrid, String markerType, boolean[][] markerGrid) {
         solver.modelPuzzle(puzzleToSolve, regionGrid, markerType, markerGrid, true);
 
@@ -51,9 +96,13 @@ public class PuzzleGenerator {
 
         for (int i = 0; i < resultGrid.length; i++)
             for (int j = 0; j < resultGrid[0].length; j++)
-                resultGrid[i][j] = solver.elements[i][j].value();
+                resultGrid[i][j] = solver.getElements()[i][j].value();
         return resultGrid;
     }
+
+    // endregion
+
+    // region private methods
 
     private void initialize() {
         int inserted = 0;
@@ -73,7 +122,7 @@ public class PuzzleGenerator {
             else
                 inserted++;
         }
-        variables = solver.elements;
+        variables = solver.getElements();
 
         performSwapOperation();
 
@@ -83,9 +132,13 @@ public class PuzzleGenerator {
                 solutionGrid[i][j] = puzzleGrid[i][j] = variables[i][j].value();
     }
 
-    /**
-     * A method that shuffles rows
-     */
+    // Shuffles rows and columns while still making it valid
+    private void performSwapOperation() {
+        performRowSwap();
+        performColumnSwap();
+    }
+
+    // A method that shuffles rows
     private void performRowSwap() {
         for (int row = 0; row < variables.length - 3; row += 3) {
             IntVar[] temp = variables[row];
@@ -94,9 +147,7 @@ public class PuzzleGenerator {
         }
     }
 
-    /**
-     * A method that shuffles columns
-     */
+    // A method that shuffles columns
     private void performColumnSwap() {
         for (int row = 0; row < variables.length; row++) {
             for (int col = 0; col < variables[0].length - 3; col += 3) {
@@ -107,11 +158,7 @@ public class PuzzleGenerator {
         }
     }
 
-    /**
-     * A method that performs cell masking based on number of givens
-     * 
-     * @return true/false
-     */
+    // A method that performs cell masking based on number of givens
     private boolean mask() {
         long timeStarted;
         int currentNumOfGivens = 81;
@@ -140,7 +187,7 @@ public class PuzzleGenerator {
                     /** Verify our modified puzzle grid */
                     solver.modelPuzzle(puzzleGrid, null, null, null, false);
                     boolean isSolvable = solver.searchAll();
-                    int numSolutions = solver.label.getSolutionListener().solutionsNo();
+                    int numSolutions = solver.getLabel().getSolutionListener().solutionsNo();
 
                     /**
                      * We are only interested in solvable and unique puzzles,
@@ -167,7 +214,7 @@ public class PuzzleGenerator {
 
     }
 
-    public int countGivens(int[][] a) {
+    private int countGivens(int[][] a) {
         int givens = 0;
         for (int j = 0; j < a.length; j++)
             for (int[] anA : a)
@@ -176,47 +223,5 @@ public class PuzzleGenerator {
         return givens;
     }
 
-    /**
-     * Shuffles rows and columns while still making it valid
-     */
-    private void performSwapOperation() {
-        performRowSwap();
-        performColumnSwap();
-    }
-
-    /**
-     * Creates a new puzzle with a specified number of givens
-     */
-    public void generate(int givens) throws Exception {
-        try {
-            initialize();
-            setNumberOfGivens(givens);
-            mask();
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-    }
-
-    /**
-     * Sets how long should the generation take before exiting
-     */
-    public void setTimeOut(long timeout) {
-        this.timeout = timeout;
-    }
-
-    public void setNumberOfGivens(int givens) {
-        this.givens = givens;
-    }
-
-    public int getNumberOfGivens() {
-        return givens;
-    }
-
-    public int[][] getPuzzleSolution() {
-        return solutionGrid;
-    }
-
-    public int[][] getPuzzle() {
-        return puzzleGrid;
-    }
+    // endregion
 }

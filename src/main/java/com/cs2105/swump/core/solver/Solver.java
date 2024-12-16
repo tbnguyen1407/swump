@@ -1,48 +1,72 @@
 package com.cs2105.swump.core.solver;
 
-import org.jacop.constraints.*;
-import org.jacop.core.IntVar;
-import org.jacop.core.Store;
-import org.jacop.search.*;
-
 import java.util.ArrayList;
 import java.util.List;
 
+import org.jacop.constraints.Alldistinct;
+import org.jacop.constraints.XeqY;
+import org.jacop.constraints.XmodYeqZ;
+import org.jacop.core.IntVar;
+import org.jacop.core.Store;
+import org.jacop.search.DepthFirstSearch;
+import org.jacop.search.IndomainMin;
+import org.jacop.search.IndomainRandom;
+import org.jacop.search.Search;
+import org.jacop.search.SelectChoicePoint;
+import org.jacop.search.SimpleSelect;
+import org.jacop.search.SmallestDomain;
+
 public class Solver {
-    public IntVar[][] elements;
+    // region fields
+
+    private IntVar[][] elements;
     private ArrayList<IntVar> vars = new ArrayList<IntVar>();
     private Store store = new Store();
-    public Search label;
+    private Search<IntVar> label;
 
-    ///
-    /// Puzzle modeling
-    ///
-    public void modelPuzzle(int[][] puzzle, int[][] customRegionGrid, String markerType, boolean[][] markerGrid,
+    // endregion
+
+    // region accessors
+
+    public IntVar[][] getElements() {
+        return elements;
+    }
+
+    public Search<IntVar> getLabel() {
+        return label;
+    }
+
+    // endregion
+
+    // region public methods
+
+    // model puzzle with custom region and markers
+    public void modelPuzzle(int[][] puzzleGrid, int[][] customRegionGrid, String markerType, boolean[][] markerGrid,
             boolean useDiagonalConstraint) {
         store = new Store();
         vars = new ArrayList<IntVar>();
 
-        elements = new IntVar[puzzle.length][puzzle.length];
+        elements = new IntVar[puzzleGrid.length][puzzleGrid.length];
 
         /** Creating variables and assigning constraints to them */
-        for (int i = 0; i < puzzle.length; i++)
-            for (int j = 0; j < puzzle.length; j++)
-                if (puzzle[i][j] == 0) {
+        for (int i = 0; i < puzzleGrid.length; i++)
+            for (int j = 0; j < puzzleGrid.length; j++)
+                if (puzzleGrid[i][j] == 0) {
                     elements[i][j] = new IntVar(store, "CELL(" + i + ", " + j + ")", 1, 9);
                     vars.add(elements[i][j]);
                 } else
-                    elements[i][j] = new IntVar(store, "CELL(" + i + ", " + j + ")" + i + j, puzzle[i][j],
-                            puzzle[i][j]);
+                    elements[i][j] = new IntVar(store, "CELL(" + i + ", " + j + ")" + i + j, puzzleGrid[i][j],
+                            puzzleGrid[i][j]);
 
         // Horizontal contraint
-        for (int r = 0; r < puzzle.length; r++) {
+        for (int r = 0; r < puzzleGrid.length; r++) {
             store.impose(new Alldistinct(elements[r]));
         }
 
         // Vertical constraint
-        for (int col = 0; col < puzzle.length; col++) {
-            IntVar[] curCol = new IntVar[puzzle.length];
-            for (int row = 0; row < puzzle.length; row++) {
+        for (int col = 0; col < puzzleGrid.length; col++) {
+            IntVar[] curCol = new IntVar[puzzleGrid.length];
+            for (int row = 0; row < puzzleGrid.length; row++) {
                 curCol[row] = elements[row][col];
             }
             store.impose(new Alldistinct(curCol));
@@ -50,11 +74,11 @@ public class Solver {
 
         // Region constraint
         if (customRegionGrid != null) {
-            IntVar[][] customRegConstraints = new IntVar[puzzle.length][puzzle.length];
-            int[] regionIdxMatric = new int[puzzle.length];
+            IntVar[][] customRegConstraints = new IntVar[puzzleGrid.length][puzzleGrid.length];
+            int[] regionIdxMatric = new int[puzzleGrid.length];
             // populate constraints
-            for (int row = 0; row < puzzle.length; row++) {
-                for (int col = 0; col < puzzle.length; col++) {
+            for (int row = 0; row < puzzleGrid.length; row++) {
+                for (int col = 0; col < puzzleGrid.length; col++) {
                     int regionIndex = customRegionGrid[row][col] - 1;
                     customRegConstraints[regionIndex][regionIdxMatric[regionIndex]] = elements[row][col];
                     regionIdxMatric[regionIndex]++;
@@ -65,8 +89,8 @@ public class Solver {
                 store.impose(new Alldistinct(aConstraint));
             }
         } else { // default region constraint
-            int numRegions = puzzle.length / 3;
-            int regionSize = puzzle.length / 3;
+            int numRegions = puzzleGrid.length / 3;
+            int regionSize = puzzleGrid.length / 3;
             for (int regRow = 0; regRow < numRegions; regRow++) {
                 for (int regCol = 0; regCol < numRegions; regCol++) {
                     List<IntVar> reg = new ArrayList<>();
@@ -123,12 +147,12 @@ public class Solver {
 
         // Diagonal constraint
         if (useDiagonalConstraint) {
-            IntVar[] diagonalA = new IntVar[puzzle.length];
-            IntVar[] diagonalB = new IntVar[puzzle.length];
+            IntVar[] diagonalA = new IntVar[puzzleGrid.length];
+            IntVar[] diagonalB = new IntVar[puzzleGrid.length];
 
-            for (int row = 0; row < puzzle.length; row++) {
+            for (int row = 0; row < puzzleGrid.length; row++) {
                 diagonalA[row] = elements[row][row];
-                diagonalB[row] = elements[row][puzzle.length - row - 1];
+                diagonalB[row] = elements[row][puzzleGrid.length - row - 1];
             }
 
             store.impose(new Alldistinct(diagonalA));
@@ -136,29 +160,33 @@ public class Solver {
         }
     }
 
-    ///
-    /// Search for solution
-    ///
-
+    // search for solution
     public boolean searchSmallestDomain() {
-        SelectChoicePoint select = new SimpleSelect(vars.toArray(new IntVar[1]), new SmallestDomain(),
-                new IndomainMin());
+        SelectChoicePoint<IntVar> select = new SimpleSelect<>(
+                vars.toArray(new IntVar[1]),
+                new SmallestDomain<>(),
+                new IndomainMin<>());
 
-        label = new DepthFirstSearch();
+        label = new DepthFirstSearch<>();
         label.setPrintInfo(false);
 
         return label.labeling(store, select);
     }
 
+    // search for all solutions
     public boolean searchAll() {
-        SelectChoicePoint select = new SimpleSelect(vars.toArray(new IntVar[1]), new SmallestDomain(),
-                new IndomainRandom());
+        SelectChoicePoint<IntVar> select = new SimpleSelect<>(
+                vars.toArray(new IntVar[1]),
+                new SmallestDomain<>(),
+                new IndomainRandom<>());
 
-        label = new DepthFirstSearch();
+        label = new DepthFirstSearch<>();
         label.setPrintInfo(false);
         label.getSolutionListener().searchAll(true);
 
         boolean result = label.labeling(store, select);
         return result;
     }
+
+    // endregion
 }

@@ -1,26 +1,41 @@
 package com.cs2105.swump.gui.multi;
 
-import com.cs2105.swump.gui.misc.ColorComboBox;
-import com.cs2105.swump.gui.misc.ColorComboBoxEditor;
-
-import javax.swing.*;
-import java.awt.*;
+import java.awt.Color;
+import java.awt.FlowLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 
-public class InputPlayer extends JPanel implements KeyListener, ActionListener
-{
-    String name;
-    Color color;
-    Color colors[] = {new Color(215, 25, 28), new Color(253, 174, 97), new Color(44, 123, 182), new Color(171, 217, 233)};
+import javax.swing.ComboBoxEditor;
+import javax.swing.JComboBox;
+import javax.swing.JLabel;
+import javax.swing.JPanel;
+import javax.swing.JTextField;
 
-    final JTextField txtName = new JTextField(10);
-    final JComboBox comboBox = new JComboBox(colors);
+import com.cs2105.swump.gui.misc.ColorComboBox;
+import com.cs2105.swump.gui.misc.ColorComboBoxEditor;
 
-    InputPlayer(int n)
-    {
+public class InputPlayer extends JPanel implements KeyListener, ActionListener {
+    // region fields
+
+    private String name;
+    private Color color;
+    private Color[] colors = {
+            new Color(215, 25, 28),
+            new Color(253, 174, 97),
+            new Color(44, 123, 182),
+            new Color(171, 217, 233)
+    };
+
+    private final JTextField txtName = new JTextField(10);
+    private final JComboBox comboBox = new JComboBox(colors);
+
+    // endregion
+
+    // region constructors
+
+    public InputPlayer(int n) {
         setLayout(new FlowLayout());
         add(new JLabel("Player" + n + " name: "));
 
@@ -38,29 +53,42 @@ public class InputPlayer extends JPanel implements KeyListener, ActionListener
         comboBox.addActionListener(this);
     }
 
+    // endregion
+
+    // region accessors
+
+    public String getName() {
+        return name;
+    }
+
+    public Color getColor() {
+        return color;
+    }
+
+    // endregion
+
+    // region public methods
+
     @Override
-    public void keyPressed(KeyEvent arg0)
-    {
-        // TODO Auto-generated method stub
+    public void keyPressed(KeyEvent arg0) {
+
     }
 
     @Override
-    public void keyReleased(KeyEvent arg0)
-    {
-        // TODO Auto-generated method stub
+    public void keyReleased(KeyEvent arg0) {
+
         name = txtName.getText();
     }
 
     @Override
-    public void keyTyped(KeyEvent arg0)
-    {
-        // TODO Auto-generated method stub
+    public void keyTyped(KeyEvent arg0) {
+
     }
 
     @Override
-    public void actionPerformed(ActionEvent arg0)
-    {
-        // TODO Auto-generated method stub
+    public void actionPerformed(ActionEvent arg0) {
         color = (Color) comboBox.getSelectedItem();
     }
+
+    // endregion
 }

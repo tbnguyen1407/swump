@@ -1,12 +1,19 @@
 package com.cs2105.swump.gui.misc;
 
+import java.awt.BorderLayout;
+import java.awt.Dimension;
+import java.awt.Font;
+
+import javax.swing.ImageIcon;
+import javax.swing.JDialog;
+import javax.swing.JLabel;
+import javax.swing.JPanel;
+
 import com.cs2105.swump.gui.SudokuMainUI;
 
-import javax.swing.*;
-import java.awt.*;
+public class About extends JDialog {
+    // region fields
 
-public class About extends JDialog
-{
     private static final long serialVersionUID = 1L;
 
     private String strAbout = "<html>"
@@ -22,8 +29,11 @@ public class About extends JDialog
             + "</ul>"
             + "<p><p></html>";
 
-    public About()
-    {
+    // endregion
+
+    // region constructors
+
+    public About() {
         super(SudokuMainUI.main, "About", true);
 
         JPanel mainPanel = new JPanel();
@@ -44,4 +54,6 @@ public class About extends JDialog
         this.setResizable(false);
         this.setVisible(true);
     }
+
+    // endregion
 }

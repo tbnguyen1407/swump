@@ -1,7 +1,8 @@
 package com.cs2105.swump.core;
 
-public class Cell
-{
+public class Cell {
+    // region fields
+
     private int value = 0;
     private int[] pencilMarks;
     private boolean isFilled;
@@ -9,88 +10,81 @@ public class Cell
     private int regionId = 0;
     private boolean isMarked;
 
-    // Constructor for Solver cells
-    public Cell(int val, boolean filled, int regionid)
-    {
+    // endregion
+
+    // region constructors
+
+    public Cell(int val, boolean filled, int regionid) {
         this.value = val;
         this.isFilled = filled;
         this.regionId = regionid;
     }
 
-    public Cell(int val, boolean filled)
-    {
+    public Cell(int val, boolean filled) {
         this.isFilled = filled;
         this.value = val;
         this.pencilMarks = new int[9];
     }
 
-    public boolean isFilled()
-    {
+    // endregion
+
+    // region accessors
+
+    public boolean isFilled() {
         return this.isFilled;
     }
 
-    public int getValue()
-    {
+    public int getValue() {
         return this.value;
     }
 
-    public boolean isMarked()
-    {
+    public boolean isMarked() {
         return this.isMarked;
     }
 
-    public void setMarked()
-    {
+    public void setMarked() {
         this.isMarked = !this.isMarked;
     }
 
-    public void setValue(int val)
-    {
+    public void setValue(int val) {
         this.value = val;
     }
 
-    public int[] getPencilMarks()
-    {
+    public int[] getPencilMarks() {
         return this.pencilMarks;
     }
 
-    public void setPencilMarks(int[] pencilMarks)
-    {
+    public void setPencilMarks(int[] pencilMarks) {
         this.pencilMarks = pencilMarks;
     }
 
-    public void addPencilmark(int mark)
-    {
+    public void addPencilmark(int mark) {
         this.pencilMarks[mark - 1] = 1;
     }
 
-    public void setFilled()
-    {
+    public void setFilled() {
         this.isFilled = true;
     }
 
-    public void setUnfilled()
-    {
+    public void setUnfilled() {
         this.isFilled = false;
     }
 
-    public void setOwner(Player owner)
-    {
+    public void setOwner(Player owner) {
         this.owner = owner;
     }
 
-    public Player getOwner()
-    {
+    public Player getOwner() {
         return this.owner;
     }
 
-    public void setRegionId(int regionid)
-    {
+    public void setRegionId(int regionid) {
         this.regionId = regionid;
     }
 
-    public int getRegionId()
-    {
+    public int getRegionId() {
         return this.regionId;
     }
+
+    // endregion
 }

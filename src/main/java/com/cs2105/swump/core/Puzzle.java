@@ -1,9 +1,15 @@
 package com.cs2105.swump.core;
 
 public class Puzzle {
-    public Cell[][] grid;
+    // region fields
+
     private final long puzzleID;
     private int difficulty;
+    private Cell[][] grid;
+
+    // endregion
+
+    // region constructors
 
     public Puzzle() {
         grid = new Cell[9][9];
@@ -40,6 +46,10 @@ public class Puzzle {
             }
         }
     }
+
+    // endregion
+
+    // region accessors
 
     public void setGrid(int[][] values) {
         for (int i = 0; i < grid.length; i++)
@@ -170,4 +180,6 @@ public class Puzzle {
     public void setGrid(Cell[][] grid) {
         this.grid = grid;
     }
+
+    // endregion
 }

@@ -1,19 +1,31 @@
 package com.cs2105.swump.gui.single;
 
-import com.cs2105.swump.gui.SudokuMainUI;
-
-import javax.swing.*;
-import java.awt.*;
+import java.awt.BorderLayout;
+import java.awt.Dimension;
+import java.awt.FlowLayout;
+import java.awt.Image;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
-public class SingleInit extends JDialog
-{
-    private static final long serialVersionUID = -7490402782065032152L;
-    public Thread gameUIUpdateThread;
+import javax.swing.AbstractButton;
+import javax.swing.ImageIcon;
+import javax.swing.JButton;
+import javax.swing.JDialog;
+import javax.swing.JLabel;
+import javax.swing.JPanel;
 
-    public SingleInit()
-    {
+import com.cs2105.swump.gui.SudokuMainUI;
+
+public class SingleInit extends JDialog {
+    // region fields
+
+    private static final long serialVersionUID = -7490402782065032152L;
+
+    // endregion
+
+    // region constructors
+
+    public SingleInit() {
         super(SudokuMainUI.main, "Singleplayer", true);
 
         // btnBlank
@@ -21,10 +33,8 @@ public class SingleInit extends JDialog
         btnBlank.setVerticalTextPosition(AbstractButton.BOTTOM);
         btnBlank.setHorizontalTextPosition(AbstractButton.CENTER);
         btnBlank.setIconTextGap(-4);
-        btnBlank.addActionListener(new ActionListener()
-        {
-            public void actionPerformed(ActionEvent e)
-            {
+        btnBlank.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
                 setVisible(false);
                 SudokuMainUI.main.startNewSinglePlayerGame(3);
             }
@@ -35,10 +45,8 @@ public class SingleInit extends JDialog
         btnEasy.setVerticalTextPosition(AbstractButton.BOTTOM);
         btnEasy.setHorizontalTextPosition(AbstractButton.CENTER);
         btnEasy.setIconTextGap(-4);
-        btnEasy.addActionListener(new ActionListener()
-        {
-            public void actionPerformed(ActionEvent e)
-            {
+        btnEasy.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
                 setVisible(false);
                 SudokuMainUI.main.startNewSinglePlayerGame(0);
             }
@@ -49,10 +57,8 @@ public class SingleInit extends JDialog
         btnNormal.setVerticalTextPosition(AbstractButton.BOTTOM);
         btnNormal.setHorizontalTextPosition(AbstractButton.CENTER);
         btnNormal.setIconTextGap(-4);
-        btnNormal.addActionListener(new ActionListener()
-        {
-            public void actionPerformed(ActionEvent e)
-            {
+        btnNormal.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
                 setVisible(false);
                 SudokuMainUI.main.startNewSinglePlayerGame(1);
             }
@@ -63,10 +69,8 @@ public class SingleInit extends JDialog
         btnHard.setVerticalTextPosition(AbstractButton.BOTTOM);
         btnHard.setHorizontalTextPosition(AbstractButton.CENTER);
         btnHard.setIconTextGap(-4);
-        btnHard.addActionListener(new ActionListener()
-        {
-            public void actionPerformed(ActionEvent e)
-            {
+        btnHard.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
                 setVisible(false);
                 SudokuMainUI.main.startNewSinglePlayerGame(2);
             }
@@ -93,12 +97,17 @@ public class SingleInit extends JDialog
         this.setLocationRelativeTo(SudokuMainUI.main);
     }
 
-    private ImageIcon getIcon(String imgPath)
-    {
+    // endregion
+
+    // region private methods
+
+    private ImageIcon getIcon(String imgPath) {
         ImageIcon icon = new ImageIcon(imgPath);
         Image img = icon.getImage();
         Image newimg = img.getScaledInstance(50, 50, Image.SCALE_SMOOTH);
         return new ImageIcon(newimg);
 
     }
+
+    // endregion
 }

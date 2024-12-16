@@ -3,6 +3,8 @@ package com.cs2105.swump.core.generator;
 import com.cs2105.swump.core.storage.Storage;
 
 public class PuzzleStorageThread implements Runnable {
+    // region fields
+
     private Storage storage;
     private int difficulty = 0;
     private final int BLANK = 0;
@@ -10,10 +12,18 @@ public class PuzzleStorageThread implements Runnable {
     private final int NORMAL = 33;
     private final int HARD = 28;
 
+    // endregion
+
+    // region constructors
+
     public PuzzleStorageThread(Storage storage, int difficulty) {
         this.storage = storage;
         this.difficulty = difficulty;
     }
+
+    // endregion
+
+    // region public methods
 
     public void setPuzzleDifficulty(int difficulty) {
         this.difficulty = difficulty;
@@ -57,4 +67,6 @@ public class PuzzleStorageThread implements Runnable {
             e.printStackTrace();
         }
     }
+
+    // endregion
 }

@@ -1,19 +1,32 @@
 package com.cs2105.swump.gui.misc;
 
+import java.awt.BorderLayout;
+import java.awt.Color;
+import java.awt.Component;
+import java.awt.Dimension;
+import java.awt.Font;
+
+import javax.swing.JDialog;
+import javax.swing.JLabel;
+import javax.swing.JPanel;
+import javax.swing.JTabbedPane;
+import javax.swing.JTable;
+import javax.swing.table.DefaultTableCellRenderer;
+import javax.swing.table.TableCellRenderer;
+
 import com.cs2105.swump.core.SudokuLogic;
 import com.cs2105.swump.gui.SudokuMainUI;
 
-import javax.swing.*;
-import javax.swing.table.DefaultTableCellRenderer;
-import javax.swing.table.TableCellRenderer;
-import java.awt.*;
+public class Scoreboard extends JDialog {
+    // region fields
 
-public class Scoreboard extends JDialog
-{
     private static final long serialVersionUID = 7697941659710544986L;
 
-    public Scoreboard()
-    {
+    // endregion
+
+    // region constructors
+
+    public Scoreboard() {
         super(SudokuMainUI.main, "ThemeSelector", true);
         JPanel mainPanel = new JPanel();
         mainPanel.setPreferredSize(new Dimension(400, 250));
@@ -24,26 +37,27 @@ public class Scoreboard extends JDialog
         this.setTitle("Top scores");
 
         String[][][] scores = SudokuLogic.getInstance().retrieveScoreboard();
-        String[] columnName = {"Player", "Date", "Score"};
+        String[] columnName = { "Player", "Date", "Score" };
 
-        //Create the components.
+        // Create the components.
         JPanel easy = createSimpleDialogBox(scores, columnName, 0);
         JPanel normal = createSimpleDialogBox(scores, columnName, 1);
         JPanel hard = createSimpleDialogBox(scores, columnName, 2);
 
         JTabbedPane tabbedPane = new JTabbedPane();
-        tabbedPane.addTab("Easy", null, easy, ""); //tooltip text
-        tabbedPane.addTab("Normal", null, normal, ""); //tooltip text
-        tabbedPane.addTab("Hard", null, hard, ""); //tooltip text
+        tabbedPane.addTab("Easy", null, easy, ""); // tooltip text
+        tabbedPane.addTab("Normal", null, normal, ""); // tooltip text
+        tabbedPane.addTab("Hard", null, hard, ""); // tooltip text
 
         mainPanel.add(tabbedPane, BorderLayout.CENTER);
     }
 
-    /**
-     * Creates the panel shown by the first tab.
-     */
-    private JPanel createSimpleDialogBox(String[][][] scores, String[] columnName, int diff)
-    {
+    // endregion
+
+    // region private methods
+
+    // Creates the panel shown by the first tab.
+    private JPanel createSimpleDialogBox(String[][][] scores, String[] columnName, int diff) {
         JPanel panel = new JPanel();
         JLabel text = new JLabel();
         panel.setLayout(new BorderLayout());
@@ -71,31 +85,33 @@ public class Scoreboard extends JDialog
 
         return panel;
     }
+
+    // endregion
 }
 
-class EvenOddRenderer implements TableCellRenderer
-{
+class EvenOddRenderer implements TableCellRenderer {
+    // region fields
+
     public static final DefaultTableCellRenderer DEFAULT_RENDERER = new DefaultTableCellRenderer();
 
-    public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus, int row, int column)
-    {
-        Component renderer = DEFAULT_RENDERER.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column);
+    // endregion
+
+    // region public methods
+
+    public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus,
+            int row, int column) {
+        Component renderer = DEFAULT_RENDERER.getTableCellRendererComponent(table, value, isSelected, hasFocus, row,
+                column);
         ((JLabel) renderer).setOpaque(true);
         Color foreground, background;
-        if (isSelected)
-        {
+        if (isSelected) {
             foreground = Color.yellow;
             background = Color.green;
-        }
-        else
-        {
-            if (row % 2 == 0)
-            {
+        } else {
+            if (row % 2 == 0) {
                 foreground = Color.black;
                 background = new Color(209, 228, 227);
-            }
-            else
-            {
+            } else {
                 foreground = Color.black;
                 background = Color.white;
             }
@@ -104,4 +120,6 @@ class EvenOddRenderer implements TableCellRenderer
         renderer.setBackground(background);
         return renderer;
     }
+
+    // endregion
 }
