@@ -4,7 +4,7 @@
   <p align="center">Swump! - Sudoku with Unique Multi Play</p>
 </h1>
 
-## Table of Contents
+## Table of Contents test
 
 - [Features](#features)
 - [Development](#development)
