@@ -1,6 +1,6 @@
 [libraries]
 jacop       = { group = "org.jacop" , name = "jacop"      , version = "4.10.0"   }
-sqlite-jdbc = { group = "org.xerial", name = "sqlite-jdbc", version = "3.49.0.0" }
+sqlite-jdbc = { group = "org.xerial", name = "sqlite-jdbc", version = "3.49.1.0" }
 
 [plugins]
 shadow        = { id = "com.gradleup.shadow",           version = "8.3.6"  }
