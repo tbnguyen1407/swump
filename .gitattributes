@@ -3,3 +3,4 @@
 *.java   text eol=lf
 *.md     text eol=lf
 *.toml   text eol=lf
+Makefile text eol=lf
