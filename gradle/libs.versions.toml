@@ -4,4 +4,4 @@ sqlite-jdbc = { group = "org.xerial", name = "sqlite-jdbc", version = "3.50.3.0"
 
 [plugins]
 shadow        = { id = "com.gradleup.shadow",           version = "9.2.2"  }
-versions-plug = { id = "com.github.ben-manes.versions", version = "0.52.0" }
+versions-plug = { id = "com.github.ben-manes.versions", version = "0.53.0" }
